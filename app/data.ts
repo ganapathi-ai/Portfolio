@@ -1,14 +1,14 @@
 export const RESUME = {
   name: "Ganapathi Kakarla",
-  title: "AI & Data Science",
-  tagline: "Bridging Healthcare & Artificial Intelligence",
+  title: "Data Science & AI",
+  tagline: "Open to Data Science, Machine Learning, AI Engineer, and Analytics roles",
   summary:
     "Cardiac Care & Cardiovascular Technology graduate, currently pursuing PGDM in AI & Data Science in Healthcare. Passionate about how AI and data-driven technologies create impact across industries. With a foundation in medical sciences and growing skills in Machine Learning, Data Analysis, and AI innovation — bridging the gap between technology and real-world problem-solving.",
   objective:
-    "Technical professional focused on applying data analysis, machine learning, and business intelligence to support strategic decisions and AI innovation in healthcare.",
+    "Technical professional focused on Data Science, AI Engineer, Machine Learning, analytics, and business intelligence roles with strong healthcare domain grounding.",
   email: "kakarlagana18@gmail.com",
   socials: {
-    linkedin: "https://www.linkedin.com/in/ganapathi-kakarla-ai-data-science",
+    linkedin: "https://www.linkedin.com/in/ganapathi-kakarla-ai-datascience",
     github: "https://github.com/ganapathi-ai",
     credly: "https://www.credly.com/users/ganapathi-kakarla",
     orcid: "https://orcid.org/0009-0003-1251-6581",

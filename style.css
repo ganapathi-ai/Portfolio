@@ -513,6 +513,28 @@ button:focus-visible {
   cursor: pointer;
 }
 
+.project-repo-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(5,5,16,0.75);
+  color: #d8deff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.project-repo-badge svg {
+  width: 13px;
+  height: 13px;
+}
+
 .project-glow {
   position: absolute;
   top: -50%; left: -50%;
