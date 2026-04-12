@@ -509,6 +509,10 @@ button:focus-visible {
   padding: 1.75rem;
 }
 
+.project-card.has-link {
+  cursor: pointer;
+}
+
 .project-glow {
   position: absolute;
   top: -50%; left: -50%;

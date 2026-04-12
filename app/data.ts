@@ -129,7 +129,7 @@ export const RESUME = {
       desc: "Interactive Tableau dashboard analyzing heart attack risk factors and identifying high-risk patient profiles. Explores relationships between demographic attributes and clinical risk indicators.",
       tags: ["Tableau", "Healthcare", "Visualization"],
       category: "Analytics",
-      github: "https://github.com/ganapathi-ai/Heart-Attack-Risk-Analysis-and-Visualization-using-Tableau",
+      github: null,
     },
     {
       icon: "🏥",
@@ -137,7 +137,7 @@ export const RESUME = {
       desc: "End-to-end analytical Power BI view of health insurance claims — financial trends, provider performance, and demographic patterns for cost optimization.",
       tags: ["Power BI", "Analytics", "Finance"],
       category: "Analytics",
-      github: "https://github.com/ganapathi-ai/Health-Insurance-Claim-Report--POWER-BI",
+      github: null,
     },
     {
       icon: "🏨",
@@ -153,7 +153,7 @@ export const RESUME = {
       desc: "ML model classifying fetal health using CTG data with real-time Streamlit clinical prediction app for early risk detection.",
       tags: ["Machine Learning", "Streamlit", "CTG"],
       category: "ML",
-      github: "https://github.com/ganapathi-ai/Fetal-Health-Classification",
+      github: null,
     },
     {
       icon: "🔬",
@@ -161,7 +161,7 @@ export const RESUME = {
       desc: "Kaplan–Meier & Cox regression on ICU trial data evaluating chlorhexidine effectiveness for ventilator-associated pneumonia prevention.",
       tags: ["Python", "Kaplan-Meier", "Cox Regression"],
       category: "Analytics",
-      github: "https://github.com/ganapathi-ai/Chlorhexidine-Impact-On-Prevention-VAP--SURVIVAL-ANALYSIS",
+      github: null,
     },
     {
       icon: "🫀",
@@ -209,7 +209,7 @@ export const RESUME = {
       desc: "End-to-end time-series forecasting using Facebook Prophet to predict NSE stock prices and sales. Includes data preprocessing, trend analysis with Pandas, and interactive visualization.",
       tags: ["Python", "Prophet", "Time Series", "Fintech"],
       category: "ML",
-      github: "https://github.com/ganapathi-ai/Stock-Price-Forecasting-Sales-Time-Series-Analysis",
+      github: null,
     },
     {
       icon: "🛒",

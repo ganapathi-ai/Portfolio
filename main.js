@@ -183,6 +183,24 @@ if (!prefersReducedMotion.matches && hasFinePointer) {
   });
 }
 
+// ===== PROJECT CARD LINKS =====
+document.querySelectorAll('.project-card[data-url]').forEach((card) => {
+  const openProjectLink = () => {
+    const url = card.getAttribute('data-url');
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  card.addEventListener('click', openProjectLink);
+  card.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openProjectLink();
+    }
+  });
+});
+
 // ===== PROJECT FILTERING =====
 const filterContainer = document.querySelector('.project-filters');
 if (filterContainer) {
