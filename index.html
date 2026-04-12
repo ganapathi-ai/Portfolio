@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Ganapathi Kakarla's portfolio in AI, data science, healthcare technology, analytics, and applied machine learning."
+  />
+  <meta name="theme-color" content="#050510" />
+  <title>Ganapathi Kakarla | AI & Data Science</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="cursor-glow"></div>
+
+  <nav id="navbar">
+    <div class="nav-logo">GK</div>
+    <ul class="nav-links" id="site-nav">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button
+      id="menu-btn"
+      type="button"
+      aria-label="Open navigation menu"
+      aria-expanded="false"
+      aria-controls="site-nav"
+    >
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+  </nav>
+
+  <main>
+    <section id="hero">
+      <div class="hero-content">
+        <div class="hero-badge">PGDM AI &amp; Data Science in Healthcare</div>
+        <h1 class="hero-title">
+          <span class="line">Ganapathi</span>
+          <span class="line gradient-text">Kakarla</span>
+        </h1>
+        <p class="hero-sub">
+          Cardiac care graduate building at the intersection of
+          <span class="highlight">healthcare</span>,
+          <span class="highlight">data science</span>, and
+          <span class="highlight">AI innovation</span> with hands-on experience in analytics, machine learning,
+          visualization, and emerging tech.
+        </p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn-primary">View Projects</a>
+          <a href="#contact" class="btn-outline">Get In Touch</a>
+        </div>
+        <div class="hero-socials">
+          <a
+            href="https://www.linkedin.com/in/ganapathi-kakarla-ai-data-science"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-pill"
+            aria-label="View my LinkedIn profile"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+          <a
+            href="https://github.com/ganapathi-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-pill"
+            aria-label="View my GitHub profile"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a
+            href="https://www.credly.com/users/ganapathi-kakarla"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-pill"
+            aria-label="View my Credly profile"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 4.5a7.5 7.5 0 110 15 7.5 7.5 0 010-15zm0 2a5.5 5.5 0 100 11 5.5 5.5 0 000-11zm0 2l1.39 2.82 3.11.45-2.25 2.19.53 3.09L12 15.27l-2.78 1.46.53-3.09L7.5 11.45l3.11-.45L12 8.5z"/></svg>
+            Credly
+          </a>
+          <a
+            href="https://orcid.org/0009-0003-1251-6581"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="social-pill"
+            aria-label="View my ORCID profile"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm-2.4 6.3a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4zm1.5 10.8H8.4V9.9h2.7v7.2zm7.116-3.75c0 2.208-1.452 3.75-3.618 3.75h-3.078V9.9h3.078c2.166 0 3.618 1.242 3.618 3.45zm-2.7.06c0-1.116-.6-1.56-1.68-1.56h-.636v3.3h.636c1.08 0 1.68-.504 1.68-1.74z"/></svg>
+            ORCID
+          </a>
+        </div>
+      </div>
+      <div class="hero-3d">
+        <div class="morph-sphere">
+          <div class="sphere-inner"></div>
+          <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+          <div class="orbit orbit-2"><div class="orbit-dot"></div></div>
+          <div class="orbit orbit-3"><div class="orbit-dot"></div></div>
+          <div class="float-tag tag-1">Python</div>
+          <div class="float-tag tag-2">AI</div>
+          <div class="float-tag tag-3">ML</div>
+          <div class="float-tag tag-4">PostgreSQL</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="section-inner">
+        <h2 class="section-title">About <span class="gradient-text">Me</span></h2>
+        <div class="about-grid">
+          <div class="glass-card about-card">
+            <div class="card-icon">&#127919;</div>
+            <h3>Summary</h3>
+            <p>
+              I am a Cardiac Care and Cardiovascular Technology graduate currently pursuing a PGDM in Artificial
+              Intelligence and Data Science in Healthcare. My work is centered on using AI, analytics, and emerging
+              technologies to solve real-world problems across healthcare and beyond.
+            </p>
+          </div>
+          <div class="glass-card about-card">
+            <div class="card-icon">&#128202;</div>
+            <h3>Top Skills</h3>
+            <div class="lang-pills">
+              <span class="lang-pill">PostgreSQL <em>Data</em></span>
+              <span class="lang-pill">Statistics <em>Analysis</em></span>
+              <span class="lang-pill">Stress Management <em>Professional</em></span>
+            </div>
+          </div>
+          <div class="glass-card about-card">
+            <div class="card-icon">&#128205;</div>
+            <h3>Contact</h3>
+            <p>India</p>
+            <p>kakarlagana18@gmail.com</p>
+            <p>Open to AI, data science, and healthcare collaborations.</p>
+          </div>
+        </div>
+
+        <h2 class="section-title mt-lg">Education <span class="gradient-text">Timeline</span></h2>
+        <div class="timeline">
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="glass-card timeline-card">
+              <span class="timeline-year">June 2025 &ndash; June 2027</span>
+              <h3>PGDM Artificial Intelligence and Data Science in Healthcare</h3>
+              <p>Institute of Health Management Research, Bangalore (IIHMR-B)</p>
+            </div>
+          </div>
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="glass-card timeline-card">
+              <span class="timeline-year">March 2021 &ndash; April 2025</span>
+              <h3>Bachelor&apos;s Degree in Cardiovascular Technology</h3>
+              <p>NTR University of Health Sciences</p>
+            </div>
+          </div>
+          <div class="timeline-item reveal">
+            <div class="timeline-dot"></div>
+            <div class="glass-card timeline-card">
+              <span class="timeline-year">June 2016 &ndash; March 2018</span>
+              <h3>Intermediate Education</h3>
+              <p>Sri Chaitanya Junior College, Vijayawada</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience" class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Work <span class="gradient-text">Experience</span></h2>
+        <div class="exp-grid">
+          <div class="glass-card exp-card reveal">
+            <div class="exp-header">
+              <div class="exp-dot active"></div>
+              <div>
+                <h3>LLM Post Training Intern</h3>
+                <span class="exp-company">Ethara AI &middot; Gurugram</span>
+              </div>
+              <span class="exp-date">Feb 2026 &ndash; Present</span>
+            </div>
+            <div class="exp-tags"><span>LLM</span><span>AI</span><span>Post Training</span></div>
+          </div>
+          <div class="glass-card exp-card reveal">
+            <div class="exp-header">
+              <div class="exp-dot"></div>
+              <div>
+                <h3>Intern</h3>
+                <span class="exp-company">KIMS Hospitals &middot; Srikakulam, Andhra Pradesh, India</span>
+              </div>
+              <span class="exp-date">Apr 2024 &ndash; Apr 2025</span>
+            </div>
+            <div class="exp-tags"><span>ECG</span><span>Echo</span><span>Cath Lab</span></div>
+          </div>
+          <div class="glass-card exp-card reveal">
+            <div class="exp-header">
+              <div class="exp-dot"></div>
+              <div>
+                <h3>Student Intern</h3>
+                <span class="exp-company">KIMS - Sunshine Hospitals &middot; Hyderabad, Telangana</span>
+              </div>
+              <span class="exp-date">Oct 2023 &ndash; Dec 2023</span>
+            </div>
+            <div class="exp-tags"><span>Clinical Training</span><span>Internship</span><span>Healthcare</span></div>
+          </div>
+          <div class="glass-card exp-card reveal">
+            <div class="exp-header">
+              <div class="exp-dot"></div>
+              <div>
+                <h3>Cardiovascular Technology Intern</h3>
+                <span class="exp-company">Great Eastern Medical School &amp; Hospital &middot; Srikakulam</span>
+              </div>
+              <span class="exp-date">Jun 2021 &ndash; Sep 2023</span>
+            </div>
+            <div class="exp-tags"><span>Catheterization</span><span>Echocardiography</span><span>Holter</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Featured <span class="gradient-text">Projects</span></h2>
+        <div class="project-filters reveal">
+          <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+          <button class="filter-btn" data-filter="AI" aria-pressed="false">AI/ML</button>
+          <button class="filter-btn" data-filter="Analytics" aria-pressed="false">Analytics</button>
+          <button class="filter-btn" data-filter="Web" aria-pressed="false">Web App</button>
+          <button class="filter-btn" data-filter="Healthcare" aria-pressed="false">Healthcare</button>
+        </div>
+        <div class="projects-grid">
+          <div class="project-card glass-card reveal" data-tags="Python,Streamlit,Power BI,Analytics">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Bar chart icon">&#128202;</div>
+            <h3>Care Transition Efficiency Analytics</h3>
+            <p>End-to-end analytics for UAC reunification pipeline with sponsor placement and care outcome tracking.</p>
+            <div class="project-tags"><span>Python</span><span>Streamlit</span><span>Power BI</span><span>EDA</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="Deep Learning,CNN,AI,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Stethoscope icon">&#129658;</div>
+            <h3>Diabetic Foot Ulcer Segmentation</h3>
+            <p>CNN-based image segmentation project using ResNet34 and U-Net for precise clinical image analysis.</p>
+            <div class="project-tags"><span>Deep Learning</span><span>ResNet34</span><span>U-Net</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="Tableau,Healthcare,Analytics">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Heart icon">&#10084;&#65039;</div>
+            <h3>Heart Attack Risk Analysis</h3>
+            <p>Interactive Tableau dashboard highlighting heart attack risk factors and high-risk patient profiles.</p>
+            <div class="project-tags"><span>Tableau</span><span>Healthcare</span><span>Visualization</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="Power BI,Analytics,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Hospital icon">&#127973;</div>
+            <h3>Health Insurance Claims Dashboard</h3>
+            <p>Power BI dashboard for provider performance, demographics, financial trends, and claims analysis.</p>
+            <div class="project-tags"><span>Power BI</span><span>Analytics</span><span>Finance</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="ML,Streamlit,AI,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Baby icon">&#128118;</div>
+            <h3>Fetal Health Classification</h3>
+            <p>Machine learning project using CTG data with an interactive Streamlit-based clinical prediction app.</p>
+            <div class="project-tags"><span>Machine Learning</span><span>Streamlit</span><span>CTG</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="Python,Analytics,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Microscope icon">&#128300;</div>
+            <h3>Survival Analysis &ndash; VAP Prevention</h3>
+            <p>Kaplan-Meier and Cox regression analysis evaluating chlorhexidine effectiveness in ICU settings.</p>
+            <div class="project-tags"><span>Python</span><span>Survival Analysis</span><span>Cox Regression</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="AI,Web,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Anatomical heart icon">&#129728;</div>
+            <h3>EchoLens &ndash; AI Echocardiogram Reporting</h3>
+            <p>AI-assisted reporting concept to streamline echocardiography workflows with structured reporting support.</p>
+            <div class="project-tags"><span>Healthcare AI</span><span>UX Research</span><span>ASE</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="ML,Streamlit,AI,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="DNA helix icon">&#129516;</div>
+            <h3>Prostate Cancer Outcome Prediction</h3>
+            <p>Interactive regression-based ML tool for predicting outcomes from clinical biomarker data.</p>
+            <div class="project-tags"><span>Machine Learning</span><span>Streamlit</span><span>Biomarkers</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="Web,Healthcare">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Sheaf of rice icon">&#127806;</div>
+            <h3>SAARTHI &ndash; Rural Healthcare Platform</h3>
+            <p>Web platform concept for improving intern recruitment and management in rural healthcare facilities.</p>
+            <div class="project-tags"><span>Web App</span><span>Healthcare</span><span>Management</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="NLP,Web,AI">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Robot face icon">&#129302;</div>
+            <h3>LinkedIn Content Engine</h3>
+            <p>AI-powered content analysis concept for optimizing professional social posts using NLP-based guidance.</p>
+            <div class="project-tags"><span>NLP</span><span>AI</span><span>Web App</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="Python,Analytics,AI">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Upwards trending chart icon">&#128200;</div>
+            <h3>Stock Price &amp; Sales Forecasting</h3>
+            <p>Time-series forecasting project using Prophet for trend prediction and interactive visualization.</p>
+            <div class="project-tags"><span>Python</span><span>Prophet</span><span>Time Series</span></div>
+          </div>
+          <div class="project-card glass-card reveal" data-tags="ML,Analytics,AI">
+            <div class="project-glow"></div>
+            <div class="project-icon" role="img" aria-label="Shopping cart icon">&#128722;</div>
+            <h3>E-commerce Customer Segmentation</h3>
+            <p>Clustering and exploratory analysis project for customer profiling and recommendation support.</p>
+            <div class="project-tags"><span>Clustering</span><span>EDA</span><span>Streamlit</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section">
+      <div class="section-inner">
+        <h2 class="section-title">Technical <span class="gradient-text">Skills</span></h2>
+        <div class="skills-grid">
+          <div class="glass-card skill-group reveal">
+            <h3>&#128187; Programming</h3>
+            <div class="skill-pills"><span>Python</span><span>R</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+          </div>
+          <div class="glass-card skill-group reveal">
+            <h3>&#128202; Data &amp; BI</h3>
+            <div class="skill-pills"><span>PostgreSQL</span><span>Power BI</span><span>Tableau</span><span>Excel</span><span>Statistics</span></div>
+          </div>
+          <div class="glass-card skill-group reveal">
+            <h3>&#129504; Machine Learning</h3>
+            <div class="skill-pills"><span>Machine Learning</span><span>Deep Learning</span><span>Streamlit</span><span>Data Analysis</span></div>
+          </div>
+          <div class="glass-card skill-group reveal">
+            <h3>&#129302; AI / GenAI</h3>
+            <div class="skill-pills"><span>AI Tools</span><span>LLM</span><span>Healthcare AI</span><span>Emerging Tech</span></div>
+          </div>
+          <div class="glass-card skill-group reveal">
+            <h3>&#127912; Design &amp; Delivery</h3>
+            <div class="skill-pills"><span>Figma</span><span>Canva</span><span>GitHub</span><span>Docker</span></div>
+          </div>
+          <div class="glass-card skill-group reveal">
+            <h3>&#128161; Professional Strengths</h3>
+            <div class="skill-pills"><span>Stress Management</span><span>Analytical Thinking</span><span>Adaptability</span><span>Curiosity</span></div>
+          </div>
+        </div>
+
+        <h2 class="section-title mt-lg">Certifications &amp; <span class="gradient-text">Achievements</span></h2>
+        <div class="certs-grid">
+          <div class="glass-card cert-card reveal">
+            <span class="cert-icon">&#128640;</span>
+            <p>AI Tools Workshop</p>
+          </div>
+          <div class="glass-card cert-card reveal">
+            <span class="cert-icon">&#127941;</span>
+            <p>Deep Learning &ndash; IIT Ropar</p>
+          </div>
+          <div class="glass-card cert-card reveal">
+            <span class="cert-icon">&#128218;</span>
+            <p>3-day bootcamp on building a global career as an academic writer while working remotely.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="section-inner contact-inner">
+        <h2 class="section-title">Let&apos;s <span class="gradient-text">Connect</span></h2>
+        <p class="contact-sub">Open to collaborations, internships, academic work, and AI-healthcare projects.</p>
+        <div class="contact-cards">
+          <a href="mailto:kakarlagana18@gmail.com" class="glass-card contact-card reveal">
+            <span class="contact-icon">&#9993;&#65039;</span>
+            <span>kakarlagana18@gmail.com</span>
+          </a>
+          <a
+            href="https://www.linkedin.com/in/ganapathi-kakarla-ai-data-science"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-card contact-card reveal"
+          >
+            <span class="contact-icon">&#128188;</span>
+            <span>LinkedIn</span>
+          </a>
+          <a
+            href="https://github.com/ganapathi-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-card contact-card reveal"
+          >
+            <span class="contact-icon">&#128025;</span>
+            <span>GitHub Portfolio</span>
+          </a>
+          <a
+            href="https://orcid.org/0009-0003-1251-6581"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-card contact-card reveal"
+          >
+            <span class="contact-icon">&#128209;</span>
+            <span>ORCID</span>
+          </a>
+          <a
+            href="https://www.credly.com/users/ganapathi-kakarla"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-card contact-card reveal"
+          >
+            <span class="contact-icon">&#127942;</span>
+            <span>Credly</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with &#10084;&#65039; by Ganapathi Kakarla &middot; <span class="gradient-text">AI &amp; Data Science</span></p>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
