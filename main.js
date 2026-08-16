@@ -309,45 +309,132 @@ if (canvas) {
       }, { passive: true });
     }
 
-    // ── Cursor spiral rings ──
+    // ── True Archimedean spiral rings on cursor ──
     const spiralRings = [];
     class SpiralRing {
       constructor(x, y) {
         this.x = x; this.y = y;
-        this.r = 0;
-        this.maxR = Math.random() * 60 + 30;
         this.life = 1;
-        this.decay = 0.018;
+        this.decay = 0.014;
         this.color = randColor();
+        this.color2 = randColor();
         this.rot = Math.random() * Math.PI * 2;
-        this.rotSpeed = (Math.random() - 0.5) * 0.12;
-        this.segments = Math.floor(Math.random() * 3) + 5;
+        this.rotSpeed = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 0.04 + 0.02);
+        this.turns = Math.random() * 1.5 + 1.5;   // how many full turns
+        this.maxR = Math.random() * 55 + 25;
+        this.progress = 0;   // 0→1 expand animation
+        this.expandSpeed = 0.045;
       }
       update() {
-        this.r += (this.maxR - this.r) * 0.08;
         this.rot += this.rotSpeed;
         this.life -= this.decay;
+        if (this.progress < 1) this.progress = Math.min(1, this.progress + this.expandSpeed);
       }
       draw() {
         if (this.life <= 0) return;
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
-        ctx.globalAlpha = this.life * 0.55;
-        // dashed spiral arc
-        for (let i = 0; i < this.segments; i++) {
-          const a1 = (i / this.segments) * Math.PI * 2;
-          const a2 = ((i + 0.6) / this.segments) * Math.PI * 2;
-          ctx.beginPath();
-          ctx.arc(0, 0, this.r, a1, a2);
-          ctx.strokeStyle = `rgba(${this.color},1)`;
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
+        ctx.globalAlpha = this.life * 0.6;
+        // draw Archimedean spiral: r = maxR * (angle / (turns*2π))
+        const totalAngle = this.turns * Math.PI * 2 * this.progress;
+        const steps = Math.max(4, Math.floor(totalAngle / 0.08));
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const angle = (i / steps) * totalAngle;
+          const r = this.maxR * (angle / (this.turns * Math.PI * 2));
+          const px = Math.cos(angle) * r;
+          const py = Math.sin(angle) * r;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
         }
+        // gradient stroke
+        const grad = ctx.createLinearGradient(-this.maxR, 0, this.maxR, 0);
+        grad.addColorStop(0, `rgba(${this.color},0)`);
+        grad.addColorStop(0.5, `rgba(${this.color},${this.life})`);
+        grad.addColorStop(1, `rgba(${this.color2},${this.life * 0.6})`);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        // outer glow dot at tip
+        const tipAngle = totalAngle;
+        const tipR = this.maxR * (tipAngle / (this.turns * Math.PI * 2));
+        ctx.beginPath();
+        ctx.arc(Math.cos(tipAngle) * tipR, Math.sin(tipAngle) * tipR, 2.5 * this.life, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color2},${this.life})`;
+        ctx.fill();
         ctx.restore();
       }
     }
     let spiralTimer = 0;
+
+    // ── Scroll-driven spine spiral (full-height left edge) ──
+    let scrollRatioSpine = 0;
+    window.addEventListener('scroll', () => {
+      const maxS = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      scrollRatioSpine = window.scrollY / maxS;
+    }, { passive: true });
+
+    const drawSpineSpiral = () => {
+      const cx = isMobile ? 18 : 32;
+      const totalH = height;
+      const turns = 6;
+      const maxR = isMobile ? 10 : 18;
+      const phase = scrollRatioSpine * Math.PI * 12;
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      // spine line
+      ctx.beginPath();
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, totalH);
+      ctx.strokeStyle = 'rgba(99,102,241,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // spiral coil around spine
+      const steps = Math.floor(totalH / 2);
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const y = t * totalH;
+        const angle = t * turns * Math.PI * 2 + phase;
+        const x = cx + Math.cos(angle) * maxR;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      const spineGrad = ctx.createLinearGradient(0, 0, 0, totalH);
+      spineGrad.addColorStop(0, 'rgba(124,58,237,0.8)');
+      spineGrad.addColorStop(0.33, 'rgba(6,182,212,0.8)');
+      spineGrad.addColorStop(0.66, 'rgba(236,72,153,0.8)');
+      spineGrad.addColorStop(1, 'rgba(16,185,129,0.8)');
+      ctx.strokeStyle = spineGrad;
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+      // second strand offset by π
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const y = t * totalH;
+        const angle = t * turns * Math.PI * 2 + phase + Math.PI;
+        const x = cx + Math.cos(angle) * maxR;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(251,191,36,0.35)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      // rung dots
+      ctx.globalAlpha = 0.18;
+      for (let i = 0; i <= steps; i += 12) {
+        const t = i / steps;
+        const y = t * totalH;
+        const angle = t * turns * Math.PI * 2 + phase;
+        const xA = cx + Math.cos(angle) * maxR;
+        const xB = cx + Math.cos(angle + Math.PI) * maxR;
+        ctx.beginPath();
+        ctx.moveTo(xA, y); ctx.lineTo(xB, y);
+        ctx.strokeStyle = `rgba(${COLORS[Math.floor(t * COLORS.length)]},1)`;
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
 
     // ── Floating geometric shapes (diamonds, hexagons, triangles) ──
     class GeoShape {
@@ -401,55 +488,6 @@ if (canvas) {
         ctx.restore();
       }
     }
-
-    // ── Scroll-driven DNA / spine helix ──
-    let scrollRatio = 0;
-    window.addEventListener('scroll', () => {
-      const maxS = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      scrollRatio = window.scrollY / maxS;
-    }, { passive: true });
-
-    const drawHelix = () => {
-      const helixX = width - (isMobile ? 28 : 48);
-      const helixH = height;
-      const amplitude = isMobile ? 10 : 18;
-      const freq = 0.045;
-      const phase = scrollRatio * Math.PI * 14; // rotates with scroll
-      ctx.save();
-      ctx.globalAlpha = 0.13;
-      // strand A
-      ctx.beginPath();
-      for (let y = 0; y < helixH; y += 3) {
-        const x = helixX + Math.sin(y * freq + phase) * amplitude;
-        y === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = 'rgba(124,58,237,1)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      // strand B
-      ctx.beginPath();
-      for (let y = 0; y < helixH; y += 3) {
-        const x = helixX + Math.sin(y * freq + phase + Math.PI) * amplitude;
-        y === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = 'rgba(6,182,212,1)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-      // rungs
-      ctx.globalAlpha = 0.08;
-      for (let y = 0; y < helixH; y += 18) {
-        const xA = helixX + Math.sin(y * freq + phase) * amplitude;
-        const xB = helixX + Math.sin(y * freq + phase + Math.PI) * amplitude;
-        ctx.beginPath();
-        ctx.moveTo(xA, y);
-        ctx.lineTo(xB, y);
-        const rungColor = COLORS[Math.floor((y / 18) % COLORS.length)];
-        ctx.strokeStyle = `rgba(${rungColor},1)`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-      ctx.restore();
-    };
 
     // ── Ambient color orbs ──
     class ColorOrb {
@@ -570,8 +608,8 @@ if (canvas) {
       // color orbs
       colorOrbs.forEach((o) => { o.update(); o.draw(); });
 
-      // helix spine (scroll-driven)
-      drawHelix();
+      // spine spiral (scroll-driven, left edge)
+      drawSpineSpiral();
 
       // sparks
       for (let i = sparks.length - 1; i >= 0; i--) {
