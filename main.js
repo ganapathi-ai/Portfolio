@@ -54,7 +54,7 @@ if (canvas) {
   if (ctx && !prefersReducedMotion.matches) {
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 36 : 72;
+    const particleCount = isMobile ? 20 : 40;
     const particles = [];
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -551,12 +551,12 @@ if (canvas) {
 
     // ── Populate objects ──
     for (let i = 0; i < particleCount; i++) particles.push(new Particle());
-    const aiSymbols = Array.from({ length: isMobile ? 12 : 24 }, () => new AiSymbol());
-    const cubes = Array.from({ length: isMobile ? 5 : 10 }, () => new GlassCube());
-    const nodes = Array.from({ length: isMobile ? 8 : 16 }, () => new NeuralNode());
-    const geoShapes = Array.from({ length: isMobile ? 8 : 16 }, () => new GeoShape());
-    const colorOrbs = Array.from({ length: isMobile ? 4 : 8 }, () => new ColorOrb());
-    for (let i = 0; i < 6; i++) glitches.push(new GlitchLine());
+    const aiSymbols = Array.from({ length: isMobile ? 6 : 12 }, () => new AiSymbol());
+    const cubes = Array.from({ length: isMobile ? 3 : 6 }, () => new GlassCube());
+    const nodes = Array.from({ length: isMobile ? 5 : 10 }, () => new NeuralNode());
+    const geoShapes = Array.from({ length: isMobile ? 4 : 8 }, () => new GeoShape());
+    const colorOrbs = Array.from({ length: isMobile ? 2 : 4 }, () => new ColorOrb());
+    for (let i = 0; i < 4; i++) glitches.push(new GlitchLine());
 
     // ── Spark burst spawner ──
     let sparkTimer = 0;
@@ -625,22 +625,10 @@ if (canvas) {
         if (spiralRings[i].life <= 0) spiralRings.splice(i, 1);
       }
 
-      // cursor fire trail
-      if (hasFinePointer && mouseX > 0) {
-        cursorFireTimer++;
-        if (cursorFireTimer % 2 === 0) {
-          spawnBurst(mouseX, mouseY, true);
-        }
-        // spiral ring on cursor periodically
-        spiralTimer++;
-        if (spiralTimer % 28 === 0) {
-          spiralRings.push(new SpiralRing(mouseX, mouseY));
-        }
-      }
-
-      // random ambient burst every ~4-8s
+      // cursor fire trail — disabled (handled by audio8d.js cursor canvas)
+      // ambient burst
       sparkTimer++;
-      if (sparkTimer > 200 && Math.random() < 0.012) {
+      if (sparkTimer > 300 && Math.random() < 0.008) {
         spawnBurst(Math.random() * width, Math.random() * height * 0.85 + height * 0.05);
         sparkTimer = 0;
       }

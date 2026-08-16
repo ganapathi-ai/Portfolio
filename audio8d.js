@@ -1,220 +1,294 @@
 /* ============================================================
-   PORTFOLIO PREMIUM EFFECTS — audio8d.js
-   - 8D Spatial Audio (auto-starts on first interaction)
-   - Tunnel scroll effect on canvas overlay
-   - 20-30 random cursor particle shapes
-   - Diagonal spiral card entrance
+   PORTFOLIO PREMIUM EFFECTS v3 — audio8d.js
+   Fixes: cursor lag, slow site, card spiral, audio silent
    ============================================================ */
 (function () {
   'use strict';
 
-  var pm = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  /* ── COLORS ── */
+  var pm  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ptr = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
   var COLS = ['124,58,237','6,182,212','245,158,11','236,72,153',
               '16,185,129','239,68,68','251,191,36','99,102,241'];
   function rc() { return COLS[Math.floor(Math.random() * COLS.length)]; }
 
   /* ================================================================
-     1. CINEMATIC TUNNEL + S-SPINE SPIRAL
-     - Perspective tunnel rings that rush toward you as you scroll
-     - An S-shaped / helix spine coils around the tunnel center
-     - Everything rotates and reveals with scroll depth
-     - Scroll drives both tunnel depth AND spine revolution angle
+     1. CURSOR — dedicated overlay canvas, zero lag
+        Particles drawn directly in their own RAF loop.
+        Spawns 6-10 shapes per move (not 20-30) to stay smooth.
   ================================================================ */
-  if (!pm.matches) {
-    var tc = document.createElement('canvas');
-    tc.id = 'tunnel-canvas';
-    tc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;';
-    document.body.insertBefore(tc, document.body.firstChild);
+  if (!pm && ptr) {
+    var cc = document.createElement('canvas');
+    cc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;will-change:transform;';
+    document.body.appendChild(cc);
+    var cx2 = cc.getContext('2d');
+    var cw = window.innerWidth, ch = window.innerHeight;
+    var pr2 = Math.min(devicePixelRatio || 1, 2);
 
+    function resizeCC() {
+      cw = window.innerWidth; ch = window.innerHeight;
+      cc.width  = Math.floor(cw * pr2);
+      cc.height = Math.floor(ch * pr2);
+      cc.style.width  = cw + 'px';
+      cc.style.height = ch + 'px';
+      cx2.setTransform(pr2, 0, 0, pr2, 0, 0);
+    }
+    resizeCC();
+    window.addEventListener('resize', resizeCC, {passive:true});
+
+    var SHAPES = ['circle','triangle','diamond','square','star','hex','ring','dot','cross','arc'];
+    var cParticles = [];
+    var mx = -999, my = -999;
+
+    function CP(x, y) {
+      this.x = x; this.y = y;
+      this.vx = (Math.random() - 0.5) * 4;
+      this.vy = (Math.random() - 0.5) * 4 - 0.8;
+      this.life = 1;
+      this.decay = Math.random() * 0.04 + 0.02;
+      this.size  = Math.random() * 7 + 2;
+      this.rot   = Math.random() * Math.PI * 2;
+      this.rs    = (Math.random() - 0.5) * 0.2;
+      this.col   = rc();
+      this.shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+    }
+
+    document.addEventListener('mousemove', function (e) {
+      mx = e.clientX; my = e.clientY;
+      // 6-10 particles per event — smooth but rich
+      var n = Math.floor(Math.random() * 5) + 6;
+      for (var i = 0; i < n; i++) cParticles.push(new CP(mx, my));
+    }, {passive:true});
+
+    function drawCP() {
+      cx2.clearRect(0, 0, cw, ch);
+      for (var i = cParticles.length - 1; i >= 0; i--) {
+        var p = cParticles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.05; p.vx *= 0.96;
+        p.rot += p.rs; p.life -= p.decay;
+        if (p.life <= 0) { cParticles.splice(i, 1); continue; }
+        var s = p.size * p.life;
+        cx2.save();
+        cx2.translate(p.x, p.y);
+        cx2.rotate(p.rot);
+        cx2.globalAlpha = p.life * 0.9;
+        cx2.strokeStyle = 'rgba(' + p.col + ',1)';
+        cx2.fillStyle   = 'rgba(' + p.col + ',' + (p.life * 0.25) + ')';
+        cx2.lineWidth   = 1;
+        cx2.beginPath();
+        switch (p.shape) {
+          case 'circle':  cx2.arc(0,0,s,0,Math.PI*2); cx2.fill(); cx2.stroke(); break;
+          case 'ring':    cx2.arc(0,0,s,0,Math.PI*2); cx2.stroke(); break;
+          case 'dot':     cx2.arc(0,0,s*0.4,0,Math.PI*2); cx2.fill(); break;
+          case 'arc':     cx2.arc(0,0,s,0,Math.PI*1.4); cx2.stroke(); break;
+          case 'cross':
+            cx2.moveTo(-s,0); cx2.lineTo(s,0);
+            cx2.moveTo(0,-s); cx2.lineTo(0,s); cx2.stroke(); break;
+          case 'triangle':
+            cx2.moveTo(0,-s); cx2.lineTo(s*.87,s*.5); cx2.lineTo(-s*.87,s*.5);
+            cx2.closePath(); cx2.fill(); cx2.stroke(); break;
+          case 'diamond':
+            cx2.moveTo(0,-s); cx2.lineTo(s*.6,0); cx2.lineTo(0,s); cx2.lineTo(-s*.6,0);
+            cx2.closePath(); cx2.fill(); cx2.stroke(); break;
+          case 'square':
+            cx2.rect(-s/2,-s/2,s,s); cx2.fill(); cx2.stroke(); break;
+          case 'hex':
+            for (var h=0;h<6;h++){var a=(h/6)*Math.PI*2; h===0?cx2.moveTo(Math.cos(a)*s,Math.sin(a)*s):cx2.lineTo(Math.cos(a)*s,Math.sin(a)*s);}
+            cx2.closePath(); cx2.fill(); cx2.stroke(); break;
+          case 'star':
+            for (var k=0;k<5;k++){
+              var ao=(k/5)*Math.PI*2-Math.PI/2, ai=ao+Math.PI/5;
+              k===0?cx2.moveTo(Math.cos(ao)*s,Math.sin(ao)*s):cx2.lineTo(Math.cos(ao)*s,Math.sin(ao)*s);
+              cx2.lineTo(Math.cos(ai)*s*.4,Math.sin(ai)*s*.4);
+            }
+            cx2.closePath(); cx2.fill(); cx2.stroke(); break;
+        }
+        cx2.restore();
+      }
+      requestAnimationFrame(drawCP);
+    }
+    requestAnimationFrame(drawCP);
+  }
+
+  /* ================================================================
+     2. CINEMATIC TUNNEL + REVOLVING S-SPINE HELIX
+        Separate canvas, z-index:1 (above bg, below content)
+        Scroll drives: depth rush + full rotation + velocity tilt
+        S-spine: two helix strands revolve around tunnel axis
+  ================================================================ */
+  if (!pm) {
+    var tc = document.createElement('canvas');
+    tc.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;';
+    document.body.insertBefore(tc, document.body.firstChild);
     var tx = tc.getContext('2d');
     var tw = window.innerWidth, th = window.innerHeight;
-    var tunnelScroll = 0, tunnelTime = 0;
-    var scrollVel = 0, lastScrollY = window.scrollY;
+    var tScroll = 0, tTime = 0, tVel = 0, tPrevScroll = 0;
+    var pr3 = Math.min(devicePixelRatio || 1, 1.5);
 
-    function resizeTunnel() {
+    function resizeTC() {
       tw = window.innerWidth; th = window.innerHeight;
-      var pr = Math.min(devicePixelRatio, 1.5);
-      tc.width = Math.floor(tw * pr); tc.height = Math.floor(th * pr);
-      tc.style.width = tw + 'px'; tc.style.height = th + 'px';
-      tx.setTransform(pr, 0, 0, pr, 0, 0);
+      tc.width  = Math.floor(tw * pr3);
+      tc.height = Math.floor(th * pr3);
+      tc.style.width  = tw + 'px';
+      tc.style.height = th + 'px';
+      tx.setTransform(pr3, 0, 0, pr3, 0, 0);
     }
-    resizeTunnel();
-    window.addEventListener('resize', resizeTunnel, {passive:true});
+    resizeTC();
+    window.addEventListener('resize', resizeTC, {passive:true});
     window.addEventListener('scroll', function () {
       var ms = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      var newRatio = window.scrollY / ms;
-      scrollVel = newRatio - tunnelScroll;
-      tunnelScroll = newRatio;
-      lastScrollY = window.scrollY;
+      var nr = window.scrollY / ms;
+      tVel = (nr - tScroll) * 60; // velocity amplified
+      tScroll = nr;
     }, {passive:true});
 
     function drawTunnel() {
       tx.clearRect(0, 0, tw, th);
-      tunnelTime += 0.006;
-      scrollVel *= 0.88; // dampen velocity
+      tTime += 0.005;
+      tVel  *= 0.9; // smooth decay
 
-      var cx = tw / 2, cy = th / 2;
-      var RINGS = 22;
-      var FOV = Math.min(tw, th) * 0.055; // base ring size at depth=1
+      var vcx = tw / 2, vcy = th / 2;
+      var RINGS = 20;
+      var FOV   = Math.min(tw, th) * 0.06;
+      var spin  = tScroll * Math.PI * 12; // full rotations with scroll
+      var depth = tScroll * RINGS * 1.6;  // rings rush forward
+      var tilt  = tVel * 14;              // lean on fast scroll
 
-      // scroll drives: depth offset (rings rush forward) + rotation
-      var depthOffset = tunnelScroll * RINGS * 1.4;  // how far into tunnel
-      var spinAngle   = tunnelScroll * Math.PI * 10; // total spin with scroll
-      var velTilt     = scrollVel * 18;              // tilt on fast scroll
-
-      /* ── TUNNEL RINGS ── */
+      /* — TUNNEL RINGS — */
       for (var i = RINGS; i >= 1; i--) {
-        // depth: rings closer to viewer are larger
-        var d = ((i - (depthOffset % RINGS) + RINGS) % RINGS) / RINGS;
-        if (d < 0.01) continue;
-        var r = FOV / d;                             // perspective scale
-        if (r > Math.max(tw, th) * 1.2) continue;   // clip huge rings
+        var d = ((i - (depth % RINGS) + RINGS) % RINGS) / RINGS;
+        if (d < 0.02) continue;
+        var R = FOV / d;
+        if (R > Math.max(tw, th) * 1.4) continue;
 
-        var ringAngle = spinAngle + tunnelTime * 0.5 + i * 0.28;
-        var sides = 6 + (i % 4);                    // 6-9 sided polygons
-        var colIdx = (i + Math.floor(tunnelScroll * COLS.length * 2)) % COLS.length;
-        var alpha = d * 0.18 * (1 + Math.abs(scrollVel) * 4);
+        var rAng  = spin + tTime * 0.4 + i * 0.3;
+        var sides = 6 + (i % 4);
+        var ci    = (i + Math.floor(tScroll * 16)) % COLS.length;
+        var alph  = Math.min(d * 0.2 + Math.abs(tVel) * 0.02, 0.25);
 
-        // slight S-curve offset: rings drift on a sine path
-        var sOx = Math.sin(d * Math.PI * 2 + spinAngle * 0.3) * tw * 0.04 * d;
-        var sOy = Math.cos(d * Math.PI * 1.5 + spinAngle * 0.2) * th * 0.03 * d;
+        // S-curve drift of ring centers
+        var ox = Math.sin(d * Math.PI * 2.5 + spin * 0.25) * tw * 0.035 * d;
+        var oy = Math.cos(d * Math.PI * 1.8 + spin * 0.18) * th * 0.025 * d;
 
         tx.save();
-        tx.translate(cx + sOx + velTilt * d, cy + sOy);
-        tx.rotate(ringAngle);
-        tx.globalAlpha = Math.min(alpha, 0.22);
-
-        // ring polygon
+        tx.translate(vcx + ox + tilt * d, vcy + oy);
+        tx.rotate(rAng);
+        tx.globalAlpha = alph;
         tx.beginPath();
         for (var s = 0; s <= sides; s++) {
           var a = (s / sides) * Math.PI * 2;
-          s === 0
-            ? tx.moveTo(Math.cos(a) * r, Math.sin(a) * r)
-            : tx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+          s === 0 ? tx.moveTo(Math.cos(a)*R, Math.sin(a)*R)
+                  : tx.lineTo(Math.cos(a)*R, Math.sin(a)*R);
         }
-        tx.strokeStyle = 'rgba(' + COLS[colIdx] + ',1)';
-        tx.lineWidth = 0.6 + d * 1.8;
+        tx.strokeStyle = 'rgba(' + COLS[ci] + ',1)';
+        tx.lineWidth   = 0.5 + d * 2;
         tx.stroke();
-
-        // subtle fill on near rings
-        if (d > 0.55) {
-          tx.globalAlpha = (d - 0.55) * 0.05;
-          tx.fillStyle = 'rgba(' + COLS[colIdx] + ',1)';
+        if (d > 0.6) {
+          tx.globalAlpha = (d - 0.6) * 0.04;
+          tx.fillStyle   = 'rgba(' + COLS[ci] + ',1)';
           tx.fill();
         }
         tx.restore();
 
-        /* ── SPINE CONNECTORS: lines from ring vertex to next ring vertex ── */
+        /* spine lattice connectors between rings */
         if (i < RINGS) {
-          var d2 = ((i + 1 - (depthOffset % RINGS) + RINGS) % RINGS) / RINGS;
-          if (d2 < 0.01) continue;
-          var r2 = FOV / d2;
-          if (r2 > Math.max(tw, th) * 1.2) continue;
-          var ringAngle2 = spinAngle + tunnelTime * 0.5 + (i + 1) * 0.28;
-          var sOx2 = Math.sin(d2 * Math.PI * 2 + spinAngle * 0.3) * tw * 0.04 * d2;
-          var sOy2 = Math.cos(d2 * Math.PI * 1.5 + spinAngle * 0.2) * th * 0.03 * d2;
-
+          var d2 = ((i+1-(depth%RINGS)+RINGS)%RINGS)/RINGS;
+          if (d2 < 0.02) continue;
+          var R2 = FOV / d2;
+          if (R2 > Math.max(tw,th)*1.4) continue;
+          var rAng2 = spin + tTime*0.4 + (i+1)*0.3;
+          var ox2 = Math.sin(d2*Math.PI*2.5+spin*0.25)*tw*0.035*d2;
+          var oy2 = Math.cos(d2*Math.PI*1.8+spin*0.18)*th*0.025*d2;
           tx.save();
-          tx.globalAlpha = Math.min(d * 0.1, 0.1);
-          tx.strokeStyle = 'rgba(' + COLS[(colIdx + 2) % COLS.length] + ',1)';
-          tx.lineWidth = 0.5;
-          // connect every other vertex — creates the spine lattice
+          tx.globalAlpha = Math.min(d * 0.08, 0.08);
+          tx.strokeStyle = 'rgba(' + COLS[(ci+3)%COLS.length] + ',1)';
+          tx.lineWidth   = 0.4;
           for (var sv = 0; sv < sides; sv += 2) {
-            var av = (sv / sides) * Math.PI * 2;
-            var av2 = (sv / sides) * Math.PI * 2;
-            var x1 = cx + sOx  + Math.cos(av  + ringAngle)  * r;
-            var y1 = cy + sOy  + Math.sin(av  + ringAngle)  * r;
-            var x2 = cx + sOx2 + Math.cos(av2 + ringAngle2) * r2;
-            var y2 = cy + sOy2 + Math.sin(av2 + ringAngle2) * r2;
-            tx.beginPath(); tx.moveTo(x1, y1); tx.lineTo(x2, y2); tx.stroke();
+            var av = (sv/sides)*Math.PI*2;
+            tx.beginPath();
+            tx.moveTo(vcx+ox  + Math.cos(av+rAng )*R,  vcy+oy  + Math.sin(av+rAng )*R);
+            tx.lineTo(vcx+ox2 + Math.cos(av+rAng2)*R2, vcy+oy2 + Math.sin(av+rAng2)*R2);
+            tx.stroke();
           }
           tx.restore();
         }
       }
 
-      /* ── S-SHAPED HELIX SPINE ── */
-      // Two strands of a helix coiling around the tunnel center axis
-      // The helix revolves with scroll — like a DNA spine inside the tunnel
-      var SPINE_STEPS = 120;
-      var spineDepth = 0.8; // how deep the spine goes into screen
-
+      /* — S-SPINE HELIX: two strands revolving around tunnel axis — */
+      var STEPS = 100;
       for (var strand = 0; strand < 2; strand++) {
+        var phase = strand * Math.PI; // strands 180° apart
         tx.beginPath();
-        var phaseOffset = strand * Math.PI; // 180° apart
-        var firstPt = true;
+        var first = true;
+        for (var si = 0; si <= STEPS; si++) {
+          var t  = si / STEPS;
+          // perspective depth: t=0 is far (small), t=1 is near (large)
+          var sz = 0.04 + t * 0.82;
+          var sc = FOV / (1 - sz + 0.04);
+          if (sc > Math.max(tw, th)) continue;
 
-        for (var si = 0; si <= SPINE_STEPS; si++) {
-          var st = si / SPINE_STEPS;           // 0..1 along spine
-          // perspective: far end is small, near end is large
-          var sz = 0.05 + st * spineDepth;
-          var scale = FOV / (1 - sz + 0.05);
-          if (scale > Math.max(tw, th)) continue;
+          // helix revolves: scroll spin + time + position along spine
+          var hAng = spin * 1.8 + tTime * 1.2 + t * Math.PI * 8 + phase;
 
-          // helix angle: revolves with scroll + time + position along spine
-          var helixAngle = spinAngle * 1.5 + tunnelTime * 0.8 + st * Math.PI * 6 + phaseOffset;
+          // S-curve: spine center snakes left-right as it recedes
+          var scx = Math.sin(t * Math.PI * 3 + spin * 0.5) * tw * 0.07 * t;
+          var scy = Math.cos(t * Math.PI * 2 + spin * 0.35) * th * 0.05 * t;
 
-          // S-curve: the spine center itself follows a sine wave
-          var sCurveX = Math.sin(st * Math.PI * 2 + spinAngle * 0.4) * tw * 0.06 * st;
-          var sCurveY = Math.cos(st * Math.PI * 1.5 + spinAngle * 0.3) * th * 0.05 * st;
+          // helix radius: large near viewer, tiny at vanishing point
+          var hR = sc * 0.3 * (1 - t * 0.55);
 
-          // helix radius shrinks toward vanishing point
-          var helixR = scale * 0.35 * (1 - st * 0.5);
-
-          var spx = cx + sCurveX + Math.cos(helixAngle) * helixR;
-          var spy = cy + sCurveY + Math.sin(helixAngle) * helixR;
-
-          if (firstPt) { tx.moveTo(spx, spy); firstPt = false; }
-          else { tx.lineTo(spx, spy); }
+          var spx = vcx + scx + Math.cos(hAng) * hR;
+          var spy = vcy + scy + Math.sin(hAng) * hR;
+          if (first) { tx.moveTo(spx, spy); first = false; }
+          else        { tx.lineTo(spx, spy); }
         }
-
-        // gradient along spine: violet → cyan → pink
-        var spGrad = tx.createLinearGradient(cx - tw*0.3, cy, cx + tw*0.3, cy);
-        spGrad.addColorStop(0,   'rgba(124,58,237,' + (0.12 + Math.abs(scrollVel)*2) + ')');
-        spGrad.addColorStop(0.4, 'rgba(6,182,212,'  + (0.14 + Math.abs(scrollVel)*2) + ')');
-        spGrad.addColorStop(0.7, 'rgba(236,72,153,' + (0.1  + Math.abs(scrollVel)*2) + ')');
-        spGrad.addColorStop(1,   'rgba(16,185,129,' + (0.08 + Math.abs(scrollVel)*2) + ')');
-        tx.strokeStyle = spGrad;
-        tx.lineWidth = 1.2 + Math.abs(scrollVel) * 8;
+        var sg = tx.createLinearGradient(vcx - tw*0.4, vcy, vcx + tw*0.4, vcy);
+        var vel_a = Math.min(0.08 + Math.abs(tVel) * 0.3, 0.55);
+        sg.addColorStop(0,   'rgba(124,58,237,' + vel_a + ')');
+        sg.addColorStop(0.3, 'rgba(6,182,212,'  + vel_a + ')');
+        sg.addColorStop(0.6, 'rgba(236,72,153,' + vel_a + ')');
+        sg.addColorStop(1,   'rgba(16,185,129,' + vel_a + ')');
+        tx.strokeStyle = sg;
+        tx.lineWidth   = 1.4 + Math.abs(tVel) * 6;
         tx.globalAlpha = 1;
         tx.stroke();
 
-        /* ── RUNG DOTS along spine ── */
-        for (var ri = 0; ri <= SPINE_STEPS; ri += 8) {
-          var rt = ri / SPINE_STEPS;
-          var rsz = 0.05 + rt * spineDepth;
-          var rscale = FOV / (1 - rsz + 0.05);
-          if (rscale > Math.max(tw, th)) continue;
-          var rAngle = spinAngle * 1.5 + tunnelTime * 0.8 + rt * Math.PI * 6 + phaseOffset;
-          var rAngle2 = rAngle + Math.PI;
-          var rHelixR = rscale * 0.35 * (1 - rt * 0.5);
-          var rCX = cx + Math.sin(rt * Math.PI * 2 + spinAngle * 0.4) * tw * 0.06 * rt;
-          var rCY = cy + Math.cos(rt * Math.PI * 1.5 + spinAngle * 0.3) * th * 0.05 * rt;
-          var rx1 = rCX + Math.cos(rAngle)  * rHelixR;
-          var ry1 = rCY + Math.sin(rAngle)  * rHelixR;
-          var rx2 = rCX + Math.cos(rAngle2) * rHelixR;
-          var ry2 = rCY + Math.sin(rAngle2) * rHelixR;
+        /* rung crossbars connecting the two strands */
+        for (var ri = 0; ri <= STEPS; ri += 6) {
+          var rt  = ri / STEPS;
+          var rsz = 0.04 + rt * 0.82;
+          var rsc = FOV / (1 - rsz + 0.04);
+          if (rsc > Math.max(tw, th)) continue;
+          var rA  = spin*1.8 + tTime*1.2 + rt*Math.PI*8;
+          var rA2 = rA + Math.PI;
+          var rHR = rsc * 0.3 * (1 - rt * 0.55);
+          var rcx2 = vcx + Math.sin(rt*Math.PI*3+spin*0.5)*tw*0.07*rt;
+          var rcy2 = vcy + Math.cos(rt*Math.PI*2+spin*0.35)*th*0.05*rt;
           tx.save();
-          tx.globalAlpha = 0.12 + Math.abs(scrollVel) * 1.5;
+          tx.globalAlpha = Math.min(0.1 + Math.abs(tVel)*0.2, 0.35);
           tx.strokeStyle = 'rgba(' + COLS[ri % COLS.length] + ',1)';
-          tx.lineWidth = 0.7;
-          tx.beginPath(); tx.moveTo(rx1, ry1); tx.lineTo(rx2, ry2); tx.stroke();
-          // dot at each rung end
-          tx.fillStyle = 'rgba(' + COLS[(ri+2) % COLS.length] + ',1)';
-          tx.globalAlpha = 0.25;
-          tx.beginPath(); tx.arc(rx1, ry1, 1.5, 0, Math.PI*2); tx.fill();
+          tx.lineWidth   = 0.6;
+          tx.beginPath();
+          tx.moveTo(rcx2 + Math.cos(rA )*rHR, rcy2 + Math.sin(rA )*rHR);
+          tx.lineTo(rcx2 + Math.cos(rA2)*rHR, rcy2 + Math.sin(rA2)*rHR);
+          tx.stroke();
+          // glowing dot at rung ends
+          tx.fillStyle   = 'rgba(' + COLS[(ri+2)%COLS.length] + ',1)';
+          tx.globalAlpha = 0.3;
+          tx.beginPath();
+          tx.arc(rcx2 + Math.cos(rA)*rHR, rcy2 + Math.sin(rA)*rHR, 1.8, 0, Math.PI*2);
+          tx.fill();
           tx.restore();
         }
       }
 
-      /* ── VANISHING POINT GLOW ── */
-      var vg = tx.createRadialGradient(cx, cy, 0, cx, cy, FOV * 3);
-      vg.addColorStop(0,   'rgba(124,58,237,0.1)');
-      vg.addColorStop(0.4, 'rgba(6,182,212,0.05)');
+      /* vanishing point glow */
+      var vg = tx.createRadialGradient(vcx, vcy, 0, vcx, vcy, FOV * 4);
+      vg.addColorStop(0,   'rgba(124,58,237,0.12)');
+      vg.addColorStop(0.5, 'rgba(6,182,212,0.05)');
       vg.addColorStop(1,   'rgba(0,0,0,0)');
       tx.globalAlpha = 1;
-      tx.fillStyle = vg;
+      tx.fillStyle   = vg;
       tx.fillRect(0, 0, tw, th);
 
       requestAnimationFrame(drawTunnel);
@@ -223,330 +297,185 @@
   }
 
   /* ================================================================
-     2. CURSOR — 20-30 RANDOM SHAPES per move
+     3. SPIRAL CARD ENTRANCE
+        Cards start off-screen rotated diagonally, spiral in on scroll.
+        Uses a separate class from .reveal to avoid conflicts.
   ================================================================ */
-  if (!pm.matches) {
-    var cursorCanvas = document.getElementById('bg-canvas');
-    // We'll inject cursor particles into the existing bg-canvas loop
-    // by attaching them to a global array the main canvas loop can pick up
-    window._cursorParticles = window._cursorParticles || [];
-
-    var SHAPES = ['circle','triangle','diamond','square','star','cross','ring','arc','dot','hex'];
-
-    function CursorParticle(x, y) {
-      this.x = x + (Math.random() - 0.5) * 20;
-      this.y = y + (Math.random() - 0.5) * 20;
-      this.vx = (Math.random() - 0.5) * 3.5;
-      this.vy = (Math.random() - 0.5) * 3.5 - 1.2;
-      this.life = 1;
-      this.decay = Math.random() * 0.03 + 0.015;
-      this.size = Math.random() * 8 + 3;
-      this.rot = Math.random() * Math.PI * 2;
-      this.rotSpeed = (Math.random() - 0.5) * 0.18;
-      this.color = rc();
-      this.shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-      this.gravity = Math.random() * 0.04;
-    }
-
-    var _lastMX = -999, _lastMY = -999, _cursorMoved = false;
-
-    if (window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
-      document.addEventListener('mousemove', function (e) {
-        _lastMX = e.clientX; _lastMY = e.clientY; _cursorMoved = true;
-        // spawn 20-30 particles per move
-        var count = Math.floor(Math.random() * 11) + 20;
-        for (var i = 0; i < count; i++) {
-          window._cursorParticles.push(new CursorParticle(_lastMX, _lastMY));
-        }
-      }, {passive:true});
-    }
-
-    // Patch into the existing bg-canvas animate loop via a secondary RAF
-    var _ctx2 = cursorCanvas ? cursorCanvas.getContext('2d') : null;
-    if (_ctx2) {
-      function drawCursorParticles() {
-        var pr = Math.min(devicePixelRatio || 1, 1.5);
-        var w = window.innerWidth, h = window.innerHeight;
-        var arr = window._cursorParticles;
-        for (var i = arr.length - 1; i >= 0; i--) {
-          var p = arr[i];
-          p.x += p.vx; p.y += p.vy; p.vy += p.gravity;
-          p.vx *= 0.97; p.rot += p.rotSpeed; p.life -= p.decay;
-          if (p.life <= 0) { arr.splice(i, 1); continue; }
-
-          _ctx2.save();
-          _ctx2.translate(p.x, p.y);
-          _ctx2.rotate(p.rot);
-          _ctx2.globalAlpha = p.life * 0.85;
-          _ctx2.strokeStyle = 'rgba(' + p.color + ',1)';
-          _ctx2.fillStyle = 'rgba(' + p.color + ',' + (p.life * 0.3) + ')';
-          _ctx2.lineWidth = 1;
-          var s = p.size * p.life;
-
-          _ctx2.beginPath();
-          switch (p.shape) {
-            case 'circle':
-              _ctx2.arc(0, 0, s, 0, Math.PI * 2); break;
-            case 'ring':
-              _ctx2.arc(0, 0, s, 0, Math.PI * 2);
-              _ctx2.stroke(); _ctx2.restore(); continue;
-            case 'triangle':
-              _ctx2.moveTo(0, -s);
-              _ctx2.lineTo(s * 0.87, s * 0.5);
-              _ctx2.lineTo(-s * 0.87, s * 0.5);
-              _ctx2.closePath(); break;
-            case 'diamond':
-              _ctx2.moveTo(0, -s); _ctx2.lineTo(s * 0.6, 0);
-              _ctx2.lineTo(0, s); _ctx2.lineTo(-s * 0.6, 0);
-              _ctx2.closePath(); break;
-            case 'square':
-              _ctx2.rect(-s / 2, -s / 2, s, s); break;
-            case 'star':
-              for (var k = 0; k < 5; k++) {
-                var ao = (k / 5) * Math.PI * 2 - Math.PI / 2;
-                var ai = ao + Math.PI / 5;
-                k === 0 ? _ctx2.moveTo(Math.cos(ao)*s, Math.sin(ao)*s) : _ctx2.lineTo(Math.cos(ao)*s, Math.sin(ao)*s);
-                _ctx2.lineTo(Math.cos(ai)*s*0.4, Math.sin(ai)*s*0.4);
-              }
-              _ctx2.closePath(); break;
-            case 'cross':
-              _ctx2.moveTo(-s, 0); _ctx2.lineTo(s, 0);
-              _ctx2.moveTo(0, -s); _ctx2.lineTo(0, s);
-              _ctx2.stroke(); _ctx2.restore(); continue;
-            case 'arc':
-              _ctx2.arc(0, 0, s, 0, Math.PI * 1.3);
-              _ctx2.stroke(); _ctx2.restore(); continue;
-            case 'dot':
-              _ctx2.arc(0, 0, s * 0.4, 0, Math.PI * 2); break;
-            case 'hex':
-              for (var h2 = 0; h2 < 6; h2++) {
-                var ha = (h2 / 6) * Math.PI * 2;
-                h2 === 0 ? _ctx2.moveTo(Math.cos(ha)*s, Math.sin(ha)*s) : _ctx2.lineTo(Math.cos(ha)*s, Math.sin(ha)*s);
-              }
-              _ctx2.closePath(); break;
-          }
-          _ctx2.fill();
-          _ctx2.stroke();
-          _ctx2.restore();
-        }
-        requestAnimationFrame(drawCursorParticles);
-      }
-      requestAnimationFrame(drawCursorParticles);
-    }
-  }
-
-  /* ================================================================
-     3. SPIRAL CARD ENTRANCE — diagonal roll from corner
-  ================================================================ */
-  if (!pm.matches && 'IntersectionObserver' in window) {
-    var _sc = Array.from(document.querySelectorAll(
-      '.project-card,.exp-card,.timeline-card,.cert-card,.about-card,.pub-card'
+  if (!pm && 'IntersectionObserver' in window) {
+    var cards = Array.from(document.querySelectorAll(
+      '.project-card,.exp-card,.timeline-card,.cert-card,.about-card,.pub-card,.skill-group,.contact-card'
     ));
-    var _sObs = new IntersectionObserver(function (entries) {
+    // Force initial hidden state via inline style (overrides any CSS)
+    cards.forEach(function (el, idx) {
+      var sign = idx % 2 === 0 ? 1 : -1;
+      el.style.opacity   = '0';
+      el.style.transform = 'perspective(1000px) translateX(' + (sign*90) + 'px) translateY(50px) rotateZ(' + (sign*-14) + 'deg) rotateY(' + (sign*-18) + 'deg) scale(0.88)';
+      el.style.transition = 'none';
+    });
+
+    var sObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) return;
-        var el = entry.target;
-        var idx = _sc.indexOf(el);
-        el.style.setProperty('--sp-sign', idx % 2 === 0 ? '1' : '-1');
-        setTimeout(function () { el.classList.add('spiral-entered'); }, (idx % 6) * 65);
-        _sObs.unobserve(el);
+        var el  = entry.target;
+        var idx = cards.indexOf(el);
+        var delay = (idx % 5) * 60;
+        setTimeout(function () {
+          el.style.transition = 'opacity 0.7s cubic-bezier(0.2,0.8,0.2,1), transform 0.7s cubic-bezier(0.2,0.8,0.2,1)';
+          el.style.opacity    = '1';
+          el.style.transform  = 'perspective(1000px) translateX(0) translateY(0) rotateZ(0deg) rotateY(0deg) scale(1)';
+        }, delay);
+        sObs.unobserve(el);
       });
-    }, { threshold: 0.06, rootMargin: '0px 0px -10px 0px' });
-    _sc.forEach(function (c) { _sObs.observe(c); });
+    }, { threshold: 0.08, rootMargin: '0px 0px -10px 0px' });
+
+    cards.forEach(function (c) { sObs.observe(c); });
   }
 
   /* ================================================================
-     4. 8D SPATIAL AUDIO — auto-starts on first user interaction
+     4. 8D SPATIAL AUDIO
+        Simplified graph: osc → gain → compressor → destination
+        Pan rotation via StereoPannerNode (guaranteed to work)
+        Auto-starts on first interaction
   ================================================================ */
   var AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC || pm.matches) return;
+  if (!AC || pm) return;
 
-  var ctx8 = null, master = null, reverbNode = null;
-  var panL = null, panR = null;
-  var bgNodes = [], bgIvs = [], playing = false, started = false;
-  var panAngle = 0;
+  var a8 = null, aMaster = null, aComp = null, aPan = null;
+  var aNodes = [], aIvs = [], aPlaying = false, aStarted = false;
+  var aPanAngle = 0;
 
-  function makeIR(actx, dur, decay) {
-    var rate = actx.sampleRate, len = Math.floor(rate * dur);
-    var buf = actx.createBuffer(2, len, rate);
-    for (var ch = 0; ch < 2; ch++) {
-      var d = buf.getChannelData(ch);
-      for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay);
-    }
-    var c = actx.createConvolver(); c.buffer = buf; return c;
+  function aOsc(freq, type, vol, det) {
+    var o = a8.createOscillator(), g = a8.createGain();
+    o.type = type; o.frequency.value = freq; o.detune.value = det || 0;
+    g.gain.value = vol;
+    o.connect(g); g.connect(aMaster); o.start();
+    aNodes.push(o, g);
   }
 
-  function osc(freq, type, vol, det) {
-    var o = ctx8.createOscillator(), g = ctx8.createGain();
-    o.type = type; o.frequency.value = freq; o.detune.value = det||0; g.gain.value = vol;
-    o.connect(g); g.connect(reverbNode); o.start();
-    bgNodes.push(o, g);
-  }
-
-  function tone(freq, dur, vol) {
-    if (!ctx8 || !playing) return;
-    var o = ctx8.createOscillator(), g = ctx8.createGain();
+  function aTone(freq, dur, vol) {
+    if (!a8 || !aPlaying) return;
+    var o = a8.createOscillator(), g = a8.createGain();
     o.type = 'sine'; o.frequency.value = freq;
-    g.gain.setValueAtTime(0, ctx8.currentTime);
-    g.gain.linearRampToValueAtTime(vol||0.04, ctx8.currentTime + 0.03);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx8.currentTime + (dur||0.7));
-    o.connect(g); g.connect(reverbNode);
-    o.start(); o.stop(ctx8.currentTime + (dur||0.7) + 0.1);
+    g.gain.setValueAtTime(0, a8.currentTime);
+    g.gain.linearRampToValueAtTime(vol || 0.04, a8.currentTime + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, a8.currentTime + (dur || 0.8));
+    o.connect(g); g.connect(aMaster);
+    o.start(); o.stop(a8.currentTime + (dur || 0.8) + 0.1);
   }
 
   function startAudio() {
-    if (started) return; started = true;
-    ctx8 = new AC();
-    master = ctx8.createGain(); master.gain.value = 0;
-    master.connect(ctx8.destination);
+    if (aStarted) return; aStarted = true;
+    a8 = new AC();
 
-    reverbNode = makeIR(ctx8, 4, 2.5);
+    // Simple reliable graph: master gain → compressor → destination
+    aMaster = a8.createGain(); aMaster.gain.value = 0;
+    aComp   = a8.createDynamicsCompressor();
+    aPan    = a8.createStereoPanner(); aPan.pan.value = 0;
+    aMaster.connect(aPan); aPan.connect(aComp); aComp.connect(a8.destination);
 
-    // 8D stereo split
-    var split = ctx8.createChannelSplitter(2);
-    var merge = ctx8.createChannelMerger(2);
-    panL = ctx8.createGain(); panL.gain.value = 0.5;
-    panR = ctx8.createGain(); panR.gain.value = 0.5;
-    reverbNode.connect(split);
-    split.connect(panL, 0); split.connect(panR, 1);
-    panL.connect(merge, 0, 0); panR.connect(merge, 0, 1);
-    merge.connect(master);
+    // Fade in over 3s
+    aMaster.gain.linearRampToValueAtTime(0.28, a8.currentTime + 3);
+    aPlaying = true;
 
-    // Chorus width
-    var cd = ctx8.createDelay(0.05); cd.delayTime.value = 0.022;
-    var cg = ctx8.createGain(); cg.gain.value = 0.18;
-    var cl = ctx8.createOscillator(), clg = ctx8.createGain();
-    cl.frequency.value = 0.4; clg.gain.value = 0.006;
-    cl.connect(clg); clg.connect(cd.delayTime); cl.start();
-    reverbNode.connect(cd); cd.connect(cg); cg.connect(master);
-    bgNodes.push(cd, cg, cl, clg);
+    // Sub bass C2 — felt more than heard
+    aOsc(65.41,  'sine', 0.055, 0);
+    aOsc(65.41,  'sine', 0.025, 6);
 
-    // Fade in 5s
-    master.gain.linearRampToValueAtTime(0.22, ctx8.currentTime + 5);
-    playing = true;
-
-    // Sub bass C2
-    osc(65.41,'sine',0.06,0); osc(65.41,'sine',0.03,5); osc(65.41,'sine',0.015,-5);
-    // Cm9 pads
-    [130.81,155.56,196,233.08,293.66,311.13,392].forEach(function(f,i){
-      osc(f,'sine',0.022,i%2?6:-6); osc(f*2,'sine',0.01,i%2?-3:3);
+    // Warm Cm9 chord pads
+    [130.81, 155.56, 196.00, 233.08, 293.66, 311.13].forEach(function (f, i) {
+      aOsc(f,   'sine', 0.028, i % 2 ? 7 : -7);
+      aOsc(f*2, 'sine', 0.012, i % 2 ? -4 : 4);
     });
-    // Shimmer
-    [523.25,659.25,783.99,987.77].forEach(function(f,i){ osc(f,'triangle',0.007,i*3); });
 
-    // Breath LFO
-    var bl=ctx8.createOscillator(), bg=ctx8.createGain();
-    bl.frequency.value=0.07; bg.gain.value=0.04;
-    bl.connect(bg); bg.connect(master.gain); bl.start();
-    bgNodes.push(bl,bg);
+    // High shimmer
+    [523.25, 659.25, 783.99].forEach(function (f, i) {
+      aOsc(f, 'triangle', 0.008, i * 4);
+    });
 
-    // Binaural theta 6Hz
-    var btL=ctx8.createOscillator(), btR=ctx8.createOscillator();
-    var btGL=ctx8.createGain(), btGR=ctx8.createGain();
-    var btM=ctx8.createChannelMerger(2);
-    btL.frequency.value=110; btR.frequency.value=116;
-    btGL.gain.value=0.018; btGR.gain.value=0.018;
-    btL.connect(btGL); btR.connect(btGR);
-    btGL.connect(btM,0,0); btGR.connect(btM,0,1);
-    btM.connect(master); btL.start(); btR.start();
-    bgNodes.push(btL,btR,btGL,btGR,btM);
+    // Breath LFO — slow volume swell
+    var bL = a8.createOscillator(), bG = a8.createGain();
+    bL.frequency.value = 0.08; bG.gain.value = 0.05;
+    bL.connect(bG); bG.connect(aMaster.gain); bL.start();
+    aNodes.push(bL, bG);
 
-    // Binaural alpha 10Hz
-    var baL=ctx8.createOscillator(), baR=ctx8.createOscillator();
-    var baGL=ctx8.createGain(), baGR=ctx8.createGain();
-    var baM=ctx8.createChannelMerger(2);
-    baL.frequency.value=146.83; baR.frequency.value=156.83;
-    baGL.gain.value=0.013; baGR.gain.value=0.013;
-    baL.connect(baGL); baR.connect(baGR);
-    baGL.connect(baM,0,0); baGR.connect(baM,0,1);
-    baM.connect(master); baL.start(); baR.start();
-    bgNodes.push(baL,baR,baGL,baGR,baM);
+    // 8D pan rotation — StereoPannerNode sweeps L→R→L
+    aIvs.push(setInterval(function () {
+      if (!aPlaying || !a8) return;
+      aPanAngle += 0.014;
+      aPan.pan.setTargetAtTime(Math.sin(aPanAngle) * 0.9, a8.currentTime, 0.08);
+    }, 50));
 
-    // 8D pan rotation ~8s cycle
-    bgIvs.push(setInterval(function(){
-      if(!playing||!ctx8){return;}
-      panAngle+=0.013;
-      var p=Math.sin(panAngle), e=Math.cos(panAngle*0.4)*0.1;
-      panL.gain.setTargetAtTime(0.5+p*0.46+e, ctx8.currentTime, 0.1);
-      panR.gain.setTargetAtTime(0.5-p*0.46-e, ctx8.currentTime, 0.1);
-    }, 55));
+    // Data pulse rhythm
+    var pn = [261.63, 196.00, 293.66, 349.23, 440.00, 246.94];
+    aIvs.push(setInterval(function () {
+      aTone(pn[Math.floor(Math.random() * pn.length)], 0.9, 0.035);
+    }, 2500));
 
-    // Data pulse
-    var pn=[261.63,196,293.66,349.23,440,246.94,329.63];
-    bgIvs.push(setInterval(function(){
-      tone(pn[Math.floor(Math.random()*pn.length)], 0.8, 0.032);
-    }, 2400));
-
-    // Signature motif every 16s
-    bgIvs.push(setInterval(function(){
-      [[261.63,0],[329.63,0.6],[392,1.2],[246.94,2],[523.25,2.9]].forEach(function(fd){
-        setTimeout(function(){ tone(fd[0],1.2,0.045); }, fd[1]*1000);
+    // Signature motif every 14s
+    aIvs.push(setInterval(function () {
+      [[261.63,0],[329.63,0.65],[392.00,1.3],[246.94,2.1],[523.25,3.0]].forEach(function (fd) {
+        setTimeout(function () { aTone(fd[0], 1.3, 0.05); }, fd[1] * 1000);
       });
-    }, 16000));
+    }, 14000));
 
-    updateBtn(true);
+    updateABtn(true);
   }
 
   function stopAudio() {
-    if (!ctx8) return;
-    playing = false;
-    master.gain.linearRampToValueAtTime(0, ctx8.currentTime + 2);
-    bgIvs.forEach(clearInterval); bgIvs = [];
-    setTimeout(function(){
-      bgNodes.forEach(function(n){ try{n.disconnect();}catch(e){} });
-      bgNodes=[]; ctx8.close(); ctx8=null; started=false;
-    }, 2500);
-    updateBtn(false);
+    if (!a8) return;
+    aPlaying = false;
+    aMaster.gain.linearRampToValueAtTime(0, a8.currentTime + 1.5);
+    aIvs.forEach(clearInterval); aIvs = [];
+    setTimeout(function () {
+      aNodes.forEach(function (n) { try { n.disconnect(); } catch (e) {} });
+      aNodes = []; a8.close(); a8 = null; aStarted = false;
+    }, 2000);
+    updateABtn(false);
   }
 
-  function updateBtn(on) {
-    var btn = document.getElementById('audio-toggle');
-    if (!btn) return;
-    if (on) {
-      btn.classList.add('audio-on');
-      btn.setAttribute('aria-label','Mute audio');
-      btn.querySelector('.audio-label').textContent = 'Sound ON';
-    } else {
-      btn.classList.remove('audio-on');
-      btn.setAttribute('aria-label','Enable audio');
-      btn.querySelector('.audio-label').textContent = 'Sound OFF';
-    }
+  function updateABtn(on) {
+    var b = document.getElementById('audio-toggle');
+    if (!b) return;
+    b.classList.toggle('audio-on', on);
+    b.setAttribute('aria-label', on ? 'Mute audio' : 'Enable audio');
+    b.querySelector('.audio-label').textContent = on ? 'Sound ON' : 'Sound OFF';
   }
 
-  // Auto-start on first ANY user interaction
-  function onFirstInteraction() {
-    document.removeEventListener('click', onFirstInteraction);
-    document.removeEventListener('keydown', onFirstInteraction);
-    document.removeEventListener('touchstart', onFirstInteraction);
-    document.removeEventListener('scroll', onFirstInteraction);
-    if (!started) startAudio();
+  // Auto-start on first interaction
+  function onFirst() {
+    ['click','keydown','scroll','touchstart'].forEach(function (ev) {
+      document.removeEventListener(ev, onFirst);
+    });
+    startAudio();
   }
-  document.addEventListener('click', onFirstInteraction);
-  document.addEventListener('keydown', onFirstInteraction);
-  document.addEventListener('touchstart', onFirstInteraction, {passive:true});
-  document.addEventListener('scroll', onFirstInteraction, {passive:true});
+  document.addEventListener('click',      onFirst);
+  document.addEventListener('keydown',    onFirst);
+  document.addEventListener('scroll',     onFirst, {passive:true});
+  document.addEventListener('touchstart', onFirst, {passive:true});
 
   // Toggle button
-  var _btn = document.getElementById('audio-toggle');
-  if (_btn) {
-    _btn.addEventListener('click', function(e) {
+  var _ab = document.getElementById('audio-toggle');
+  if (_ab) {
+    _ab.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (!playing) { startAudio(); } else { stopAudio(); }
+      aPlaying ? stopAudio() : startAudio();
     });
   }
 
   // Section tones
-  var ST={hero:261.63,about:329.63,experience:196,projects:293.66,skills:440,contact:246.94};
+  var ST = {hero:261.63,about:329.63,experience:196,projects:293.66,skills:440,contact:246.94};
   if ('IntersectionObserver' in window) {
-    var _so = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if(e.isIntersecting&&playing) tone(ST[e.target.id]||261.63,1.5,0.024); });
-    },{threshold:0.3});
-    document.querySelectorAll('section[id]').forEach(function(s){ _so.observe(s); });
+    var sIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && aPlaying) aTone(ST[e.target.id] || 261.63, 1.5, 0.025);
+      });
+    }, {threshold: 0.35});
+    document.querySelectorAll('section[id]').forEach(function (s) { sIO.observe(s); });
   }
 
-  // Nav micro-click
-  document.querySelectorAll('.nav-links a,.btn-primary,.btn-outline,.filter-btn').forEach(function(el){
-    el.addEventListener('click', function(){ tone(392,0.13,0.02); });
+  // Nav click micro-sound
+  document.querySelectorAll('.nav-links a,.btn-primary,.btn-outline,.filter-btn').forEach(function (el) {
+    el.addEventListener('click', function () { aTone(392, 0.12, 0.022); });
   });
 
 }());
