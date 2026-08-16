@@ -838,30 +838,37 @@ footer {
 }
 .audio-icon { font-size: 1rem; }
 
-/* ===== SPIRAL CARD ENTRANCE ===== */
-.project-card, .exp-card, .timeline-card, .cert-card, .about-card {
-  --sp-sign: 1;
+/* ===== TUNNEL CANVAS ===== */
+#tunnel-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
 }
-.project-card:not(.spiral-entered),
-.exp-card:not(.spiral-entered),
-.timeline-card:not(.spiral-entered),
-.cert-card:not(.spiral-entered),
-.about-card:not(.spiral-entered) {
+
+/* ===== SPIRAL CARD ENTRANCE ===== */
+.project-card, .exp-card, .timeline-card, .cert-card, .about-card, .pub-card {
+  --sp-sign: 1;
   opacity: 0;
   transform:
     perspective(1200px)
-    translateX(calc(var(--sp-sign) * 110px))
-    translateY(55px)
-    rotateZ(calc(var(--sp-sign) * -16deg))
-    rotateY(calc(var(--sp-sign) * -20deg))
-    scale(0.88);
+    translateX(calc(var(--sp-sign) * 120px))
+    translateY(70px)
+    rotateZ(calc(var(--sp-sign) * -18deg))
+    rotateY(calc(var(--sp-sign) * -24deg))
+    scale(0.85);
 }
 .spiral-entered {
   opacity: 1 !important;
-  transform: perspective(1200px) translateX(0) translateY(0) rotateZ(0deg) rotateY(0deg) scale(1) !important;
+  transform:
+    perspective(1200px)
+    translateX(0) translateY(0)
+    rotateZ(0deg) rotateY(0deg)
+    scale(1) !important;
   transition:
-    opacity 0.72s cubic-bezier(0.2,0.8,0.2,1),
-    transform 0.72s cubic-bezier(0.2,0.8,0.2,1) !important;
+    opacity 0.78s cubic-bezier(0.2,0.8,0.2,1),
+    transform 0.78s cubic-bezier(0.2,0.8,0.2,1) !important;
 }
 
 /* ===== AUDIO TOGGLE ===== */
