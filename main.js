@@ -235,32 +235,250 @@ if (canvas) {
       }
     }
 
-    // ── Fire / spark bursts ──
+    // ── Extended color palette ──
+    const COLORS = [
+      '124,58,237',   // violet
+      '6,182,212',    // cyan
+      '245,158,11',   // amber
+      '236,72,153',   // pink
+      '16,185,129',   // emerald
+      '239,68,68',    // red-fire
+      '251,191,36',   // gold
+      '99,102,241',   // indigo
+    ];
+    const randColor = () => COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    // ── Fire / spark bursts (enhanced) ──
     const sparks = [];
     class Spark {
-      constructor(x, y) {
+      constructor(x, y, fromCursor = false) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 3.5;
-        this.vy = -(Math.random() * 4 + 1.5);
+        this.fromCursor = fromCursor;
+        const spread = fromCursor ? 5.5 : 3.5;
+        this.vx = (Math.random() - 0.5) * spread;
+        this.vy = -(Math.random() * (fromCursor ? 6 : 4) + 1.5);
         this.life = 1;
-        this.decay = Math.random() * 0.025 + 0.012;
-        this.size = Math.random() * 2.5 + 0.8;
-        this.hot = Math.random() > 0.5;
+        this.decay = Math.random() * 0.022 + (fromCursor ? 0.008 : 0.012);
+        this.size = Math.random() * (fromCursor ? 3.5 : 2.5) + 0.8;
+        this.colorIdx = Math.floor(Math.random() * 4); // fire tones
+        this.tail = [];
       }
       update() {
+        this.tail.push({ x: this.x, y: this.y, life: this.life });
+        if (this.tail.length > 6) this.tail.shift();
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.06; // gravity
+        this.vy += 0.055;
         this.vx *= 0.97;
         this.life -= this.decay;
       }
       draw() {
         if (this.life <= 0) return;
-        const r = this.hot ? `255,${Math.floor(100 + this.life * 100)},20` : `245,158,11`;
+        // tail trail
+        this.tail.forEach((t, i) => {
+          const a = (i / this.tail.length) * this.life * 0.4;
+          ctx.beginPath();
+          ctx.arc(t.x, t.y, this.size * (i / this.tail.length) * this.life, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,${Math.floor(80 + i * 20)},20,${a})`;
+          ctx.fill();
+        });
+        // core
+        const fireColors = ['255,60,10', '255,140,20', '245,158,11', '251,191,36'];
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r},${this.life * 0.85})`;
+        ctx.fillStyle = `rgba(${fireColors[this.colorIdx]},${this.life * 0.9})`;
+        ctx.fill();
+        // inner white-hot core
+        if (this.life > 0.6) {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size * this.life * 0.4, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,200,${(this.life - 0.6) * 1.5})`;
+          ctx.fill();
+        }
+      }
+    }
+
+    // ── Cursor fire trail ──
+    let mouseX = -999, mouseY = -999;
+    let cursorFireTimer = 0;
+    if (hasFinePointer) {
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      }, { passive: true });
+    }
+
+    // ── Cursor spiral rings ──
+    const spiralRings = [];
+    class SpiralRing {
+      constructor(x, y) {
+        this.x = x; this.y = y;
+        this.r = 0;
+        this.maxR = Math.random() * 60 + 30;
+        this.life = 1;
+        this.decay = 0.018;
+        this.color = randColor();
+        this.rot = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.12;
+        this.segments = Math.floor(Math.random() * 3) + 5;
+      }
+      update() {
+        this.r += (this.maxR - this.r) * 0.08;
+        this.rot += this.rotSpeed;
+        this.life -= this.decay;
+      }
+      draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.globalAlpha = this.life * 0.55;
+        // dashed spiral arc
+        for (let i = 0; i < this.segments; i++) {
+          const a1 = (i / this.segments) * Math.PI * 2;
+          const a2 = ((i + 0.6) / this.segments) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, this.r, a1, a2);
+          ctx.strokeStyle = `rgba(${this.color},1)`;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+    let spiralTimer = 0;
+
+    // ── Floating geometric shapes (diamonds, hexagons, triangles) ──
+    class GeoShape {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height + 60;
+        this.size = Math.random() * 18 + 8;
+        this.speedY = -(Math.random() * 0.15 + 0.04);
+        this.speedX = (Math.random() - 0.5) * 0.1;
+        this.rot = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.012;
+        this.opacity = Math.random() * 0.14 + 0.04;
+        this.color = randColor();
+        this.type = Math.floor(Math.random() * 3); // 0=diamond, 1=hex, 2=triangle
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rot += this.rotSpeed;
+        if (this.y < -80) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
+        ctx.globalAlpha = this.opacity;
+        ctx.strokeStyle = `rgba(${this.color},1)`;
+        ctx.lineWidth = 0.8;
+        ctx.fillStyle = `rgba(${this.color},0.08)`;
+        ctx.beginPath();
+        if (this.type === 0) { // diamond
+          ctx.moveTo(0, -this.size);
+          ctx.lineTo(this.size * 0.6, 0);
+          ctx.lineTo(0, this.size);
+          ctx.lineTo(-this.size * 0.6, 0);
+        } else if (this.type === 1) { // hexagon
+          for (let i = 0; i < 6; i++) {
+            const a = (i / 6) * Math.PI * 2;
+            i === 0 ? ctx.moveTo(Math.cos(a) * this.size, Math.sin(a) * this.size)
+                     : ctx.lineTo(Math.cos(a) * this.size, Math.sin(a) * this.size);
+          }
+        } else { // triangle
+          ctx.moveTo(0, -this.size);
+          ctx.lineTo(this.size * 0.87, this.size * 0.5);
+          ctx.lineTo(-this.size * 0.87, this.size * 0.5);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // ── Scroll-driven DNA / spine helix ──
+    let scrollRatio = 0;
+    window.addEventListener('scroll', () => {
+      const maxS = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      scrollRatio = window.scrollY / maxS;
+    }, { passive: true });
+
+    const drawHelix = () => {
+      const helixX = width - (isMobile ? 28 : 48);
+      const helixH = height;
+      const amplitude = isMobile ? 10 : 18;
+      const freq = 0.045;
+      const phase = scrollRatio * Math.PI * 14; // rotates with scroll
+      ctx.save();
+      ctx.globalAlpha = 0.13;
+      // strand A
+      ctx.beginPath();
+      for (let y = 0; y < helixH; y += 3) {
+        const x = helixX + Math.sin(y * freq + phase) * amplitude;
+        y === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(124,58,237,1)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      // strand B
+      ctx.beginPath();
+      for (let y = 0; y < helixH; y += 3) {
+        const x = helixX + Math.sin(y * freq + phase + Math.PI) * amplitude;
+        y === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(6,182,212,1)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      // rungs
+      ctx.globalAlpha = 0.08;
+      for (let y = 0; y < helixH; y += 18) {
+        const xA = helixX + Math.sin(y * freq + phase) * amplitude;
+        const xB = helixX + Math.sin(y * freq + phase + Math.PI) * amplitude;
+        ctx.beginPath();
+        ctx.moveTo(xA, y);
+        ctx.lineTo(xB, y);
+        const rungColor = COLORS[Math.floor((y / 18) % COLORS.length)];
+        ctx.strokeStyle = `rgba(${rungColor},1)`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+      ctx.restore();
+    };
+
+    // ── Ambient color orbs ──
+    class ColorOrb {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height + 40;
+        this.r = Math.random() * 40 + 20;
+        this.speedY = -(Math.random() * 0.1 + 0.02);
+        this.speedX = (Math.random() - 0.5) * 0.06;
+        this.opacity = Math.random() * 0.06 + 0.02;
+        this.color = randColor();
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = Math.random() * 0.02 + 0.005;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.pulse += this.pulseSpeed;
+        if (this.y < -80) this.reset();
+      }
+      draw() {
+        const pr = this.r + Math.sin(this.pulse) * 6;
+        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, pr);
+        grad.addColorStop(0, `rgba(${this.color},${this.opacity * 2})`);
+        grad.addColorStop(1, `rgba(${this.color},0)`);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, pr, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
         ctx.fill();
       }
     }
@@ -298,15 +516,15 @@ if (canvas) {
     const aiSymbols = Array.from({ length: isMobile ? 12 : 24 }, () => new AiSymbol());
     const cubes = Array.from({ length: isMobile ? 5 : 10 }, () => new GlassCube());
     const nodes = Array.from({ length: isMobile ? 8 : 16 }, () => new NeuralNode());
+    const geoShapes = Array.from({ length: isMobile ? 8 : 16 }, () => new GeoShape());
+    const colorOrbs = Array.from({ length: isMobile ? 4 : 8 }, () => new ColorOrb());
     for (let i = 0; i < 6; i++) glitches.push(new GlitchLine());
 
     // ── Spark burst spawner ──
     let sparkTimer = 0;
-    const spawnBurst = () => {
-      const bx = Math.random() * width;
-      const by = Math.random() * height * 0.8 + height * 0.1;
-      const count = Math.floor(Math.random() * 18 + 8);
-      for (let i = 0; i < count; i++) sparks.push(new Spark(bx, by));
+    const spawnBurst = (bx, by, fromCursor = false) => {
+      const count = Math.floor(Math.random() * (fromCursor ? 14 : 22) + (fromCursor ? 6 : 12));
+      for (let i = 0; i < count; i++) sparks.push(new Spark(bx, by, fromCursor));
     };
 
     const resizeCanvas = () => {
@@ -346,6 +564,15 @@ if (canvas) {
         if (g.life <= 0 && Math.random() < 0.004) g.reset();
       });
 
+      // geo shapes
+      geoShapes.forEach((g) => { g.update(); g.draw(); });
+
+      // color orbs
+      colorOrbs.forEach((o) => { o.update(); o.draw(); });
+
+      // helix spine (scroll-driven)
+      drawHelix();
+
       // sparks
       for (let i = sparks.length - 1; i >= 0; i--) {
         sparks[i].update();
@@ -353,10 +580,30 @@ if (canvas) {
         if (sparks[i].life <= 0) sparks.splice(i, 1);
       }
 
-      // spawn burst every ~4-8 seconds randomly
+      // spiral rings
+      for (let i = spiralRings.length - 1; i >= 0; i--) {
+        spiralRings[i].update();
+        spiralRings[i].draw();
+        if (spiralRings[i].life <= 0) spiralRings.splice(i, 1);
+      }
+
+      // cursor fire trail
+      if (hasFinePointer && mouseX > 0) {
+        cursorFireTimer++;
+        if (cursorFireTimer % 2 === 0) {
+          spawnBurst(mouseX, mouseY, true);
+        }
+        // spiral ring on cursor periodically
+        spiralTimer++;
+        if (spiralTimer % 28 === 0) {
+          spiralRings.push(new SpiralRing(mouseX, mouseY));
+        }
+      }
+
+      // random ambient burst every ~4-8s
       sparkTimer++;
-      if (sparkTimer > 240 && Math.random() < 0.008) {
-        spawnBurst();
+      if (sparkTimer > 200 && Math.random() < 0.012) {
+        spawnBurst(Math.random() * width, Math.random() * height * 0.85 + height * 0.05);
         sparkTimer = 0;
       }
 
