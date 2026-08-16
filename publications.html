@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Ganapathi Kakarla's research publications in data science, AI, and healthcare analytics." />
+  <meta name="theme-color" content="#050510" />
+  <title>Publications | Ganapathi Kakarla</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    .pub-grid { display: grid; gap: 1.5rem; }
+
+    .pub-card { padding: 1.75rem; }
+
+    .pub-card h3 { font-size: 1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.75rem; }
+
+    .pub-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; }
+
+    .pub-journal {
+      color: var(--accent2);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .pub-date {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .pub-badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.25);
+      font-size: 0.72rem;
+      color: #a78bfa;
+      font-weight: 600;
+    }
+
+    .pub-details { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+
+    .pub-detail { font-size: 0.82rem; color: var(--muted); }
+    .pub-detail strong { color: var(--text); }
+
+    .pub-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    .pub-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    .pub-link:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: rgba(6,182,212,0.1);
+    }
+
+    .pub-count-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      border: 1px solid rgba(124,58,237,0.4);
+      background: rgba(124,58,237,0.1);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #a78bfa;
+      margin-bottom: 2.5rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 2.5rem;
+      transition: color 0.3s;
+    }
+    .back-link:hover { color: var(--accent2); }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="cursor-glow"></div>
+
+  <nav id="navbar">
+    <div class="nav-logo">GK</div>
+    <ul class="nav-links" id="site-nav">
+      <li><a href="index.html#hero">Home</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#experience">Experience</a></li>
+      <li><a href="index.html#projects">Projects</a></li>
+      <li><a href="index.html#skills">Skills</a></li>
+      <li><a href="publications.html" class="active-nav-link">Publications</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <button id="menu-btn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="site-nav">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+  </nav>
+
+  <main>
+    <section class="section" style="padding-top: 8rem;">
+      <div class="section-inner">
+        <a href="index.html" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Back to Portfolio
+        </a>
+
+        <h2 class="section-title">Research <span class="gradient-text">Publications</span></h2>
+
+        <div class="pub-count-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-2.4 6.3a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4zm1.5 10.8H8.4V9.9h2.7v7.2zm7.116-3.75c0 2.208-1.452 3.75-3.618 3.75h-3.078V9.9h3.078c2.166 0 3.618 1.242 3.618 3.45zm-2.7.06c0-1.116-.6-1.56-1.68-1.56h-.636v3.3h.636c1.08 0 1.68-.504 1.68-1.74z"/></svg>
+          4 Works on ORCID
+        </div>
+
+        <div class="pub-grid">
+
+          <!-- Publication 1 -->
+          <div class="glass-card pub-card reveal">
+            <div class="pub-meta">
+              <span class="pub-badge">Journal Article</span>
+              <span class="pub-journal">Indian Journal of Computer Science and Technology</span>
+              <span class="pub-date">2026-07-10</span>
+            </div>
+            <h3>Customer Engagement, Product Utilization, and Retention Analytics in European Banking: A Multi-Dimensional Churn Intelligence Framework</h3>
+            <div class="pub-details">
+              <span class="pub-detail"><strong>DOI:</strong> 10.59256/indjcst.20260502090</span>
+              <span class="pub-detail"><strong>ISSN:</strong> 2583-5300</span>
+              <span class="pub-detail"><strong>Author:</strong> Kakarla Ganapathi</span>
+            </div>
+            <div class="pub-links">
+              <a href="https://doi.org/10.59256/indjcst.20260502090" target="_blank" rel="noopener noreferrer" class="pub-link">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                View DOI
+              </a>
+              <a href="https://orcid.org/0009-0003-1251-6581" target="_blank" rel="noopener noreferrer" class="pub-link">ORCID</a>
+            </div>
+          </div>
+
+          <!-- Publication 2 -->
+          <div class="glass-card pub-card reveal">
+            <div class="pub-meta">
+              <span class="pub-badge">Journal Article</span>
+              <span class="pub-journal">Journal of Universal Applied Research</span>
+              <span class="pub-date">2026-04-28</span>
+            </div>
+            <h3>Product Optimization and Revenue Contribution Analysis: A Data-Driven Framework for the Specialty Coffee Retail Industry — Afficionado Coffee Roasters Multi-Store Product Portfolio Study</h3>
+            <div class="pub-details">
+              <span class="pub-detail"><strong>Language:</strong> English</span>
+              <span class="pub-detail"><strong>Country:</strong> India</span>
+              <span class="pub-detail"><strong>Author:</strong> Ganapathi Kakarla</span>
+            </div>
+            <div class="pub-links">
+              <a href="https://universalappliedresearch.com/index.php/JUAR/article/view/5" target="_blank" rel="noopener noreferrer" class="pub-link">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                View Article
+              </a>
+              <a href="https://orcid.org/0009-0003-1251-6581" target="_blank" rel="noopener noreferrer" class="pub-link">ORCID</a>
+            </div>
+          </div>
+
+          <!-- Publication 3 -->
+          <div class="glass-card pub-card reveal">
+            <div class="pub-meta">
+              <span class="pub-badge">Journal Article</span>
+              <span class="pub-journal">Indian Journal of Computer Science and Technology</span>
+              <span class="pub-date">2026-04-26</span>
+            </div>
+            <h3>Customer, Product, and Profitability Performance Analysis in Supply Chain Operations: An Exploratory Data Analytics Framework for APL Logistics</h3>
+            <div class="pub-details">
+              <span class="pub-detail"><strong>DOI:</strong> 10.59256/indjcst.20260501056</span>
+              <span class="pub-detail"><strong>ISSN:</strong> 2583-5300</span>
+              <span class="pub-detail"><strong>Author:</strong> Kakarla Ganapathi</span>
+            </div>
+            <div class="pub-links">
+              <a href="https://doi.org/10.59256/indjcst.20260501056" target="_blank" rel="noopener noreferrer" class="pub-link">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                View DOI
+              </a>
+              <a href="https://orcid.org/0009-0003-1251-6581" target="_blank" rel="noopener noreferrer" class="pub-link">ORCID</a>
+            </div>
+          </div>
+
+          <!-- Publication 4 -->
+          <div class="glass-card pub-card reveal">
+            <div class="pub-meta">
+              <span class="pub-badge">Journal Article</span>
+              <span class="pub-journal">RS Publication</span>
+              <span class="pub-date">2026-02-21</span>
+            </div>
+            <h3>Quantifying Operational Flow and Placement Bottlenecks in a Multi-Stage Child Welfare Program: Analytical Evidence from 1,084 Days of Daily Census Records</h3>
+            <div class="pub-details">
+              <span class="pub-detail"><strong>DOI:</strong> 10.5281/ZENODO.18723845</span>
+              <span class="pub-detail"><strong>Author:</strong> Ganapathi Kakarla</span>
+            </div>
+            <div class="pub-links">
+              <a href="https://doi.org/10.5281/ZENODO.18723845" target="_blank" rel="noopener noreferrer" class="pub-link">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                View DOI
+              </a>
+              <a href="https://orcid.org/0009-0003-1251-6581" target="_blank" rel="noopener noreferrer" class="pub-link">ORCID</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with &#10084;&#65039; by Ganapathi Kakarla &middot; <span class="gradient-text">AI &amp; Data Science</span></p>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
