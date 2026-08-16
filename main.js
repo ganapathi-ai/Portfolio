@@ -53,18 +53,18 @@ if (canvas) {
 
   if (ctx && !prefersReducedMotion.matches) {
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
-    const particleCount = window.innerWidth < 768 ? 36 : 72;
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 36 : 72;
     const particles = [];
     let width = window.innerWidth;
     let height = window.innerHeight;
     let animationFrameId = 0;
     let isPageVisible = !document.hidden;
+    let time = 0;
 
+    // ── Floating particles (original) ──
     class Particle {
-      constructor() {
-        this.reset(true);
-      }
-
+      constructor() { this.reset(true); }
       reset(initial = false) {
         this.x = Math.random() * width;
         this.y = initial ? Math.random() * height : height + 10;
@@ -74,16 +74,11 @@ if (canvas) {
         this.opacity = Math.random() * 0.45 + 0.1;
         this.color = Math.random() > 0.5 ? '124,58,237' : '6,182,212';
       }
-
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
-
-        if (this.y < -10) {
-          this.reset();
-        }
+        if (this.y < -10) this.reset();
       }
-
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -91,6 +86,228 @@ if (canvas) {
         ctx.fill();
       }
     }
+
+    // ── AI text symbols drifting up ──
+    const AI_SYMBOLS = ['01','∑','∇','λ','∂','AI','ML','∞','⊕','⊗','GPU','LLM','RAG','CNN','RNN','∫','σ','μ','θ','α','β'];
+    class AiSymbol {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height + 20;
+        this.text = AI_SYMBOLS[Math.floor(Math.random() * AI_SYMBOLS.length)];
+        this.size = Math.random() * 9 + 7;
+        this.speedY = -(Math.random() * 0.22 + 0.06);
+        this.speedX = (Math.random() - 0.5) * 0.12;
+        this.opacity = Math.random() * 0.18 + 0.04;
+        this.color = Math.random() > 0.5 ? '124,58,237' : '6,182,212';
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.y < -20) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.font = `${this.size}px 'Space Grotesk', monospace`;
+        ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
+        ctx.fillText(this.text, this.x, this.y);
+        ctx.restore();
+      }
+    }
+
+    // ── Glassmorphic 3D floating cubes ──
+    class GlassCube {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height + 80;
+        this.size = Math.random() * 28 + 14;
+        this.speedY = -(Math.random() * 0.18 + 0.04);
+        this.speedX = (Math.random() - 0.5) * 0.1;
+        this.rot = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.008;
+        this.opacity = Math.random() * 0.13 + 0.04;
+        this.hue = Math.random() > 0.5 ? '124,58,237' : '6,182,212';
+        this.distort = 0;
+        this.distortTimer = Math.random() * 300;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.rot += this.rotSpeed;
+        this.distortTimer--;
+        if (this.distortTimer <= 0) {
+          this.distort = (Math.random() - 0.5) * 0.35;
+          this.distortTimer = Math.random() * 200 + 80;
+        } else {
+          this.distort *= 0.92;
+        }
+        if (this.y < -100) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot + this.distort);
+        const s = this.size;
+        // face
+        ctx.beginPath();
+        ctx.rect(-s / 2, -s / 2, s, s);
+        ctx.fillStyle = `rgba(${this.hue},${this.opacity * 0.5})`;
+        ctx.fill();
+        // border glow
+        ctx.strokeStyle = `rgba(${this.hue},${this.opacity * 2})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+        // top face (3D illusion)
+        const d = s * 0.28;
+        ctx.beginPath();
+        ctx.moveTo(-s / 2, -s / 2);
+        ctx.lineTo(-s / 2 + d, -s / 2 - d);
+        ctx.lineTo(s / 2 + d, -s / 2 - d);
+        ctx.lineTo(s / 2, -s / 2);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${this.hue},${this.opacity * 0.7})`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${this.hue},${this.opacity * 2})`;
+        ctx.stroke();
+        // right face
+        ctx.beginPath();
+        ctx.moveTo(s / 2, -s / 2);
+        ctx.lineTo(s / 2 + d, -s / 2 - d);
+        ctx.lineTo(s / 2 + d, s / 2 - d);
+        ctx.lineTo(s / 2, s / 2);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${this.hue},${this.opacity * 0.3})`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${this.hue},${this.opacity * 2})`;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // ── Neural network nodes ──
+    class NeuralNode {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height + 30;
+        this.r = Math.random() * 5 + 3;
+        this.speedY = -(Math.random() * 0.14 + 0.03);
+        this.speedX = (Math.random() - 0.5) * 0.08;
+        this.opacity = Math.random() * 0.22 + 0.06;
+        this.pulse = Math.random() * Math.PI * 2;
+        this.pulseSpeed = Math.random() * 0.03 + 0.01;
+        this.connections = [];
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.pulse += this.pulseSpeed;
+        if (this.y < -30) this.reset();
+      }
+      draw(nodes) {
+        const pr = this.r + Math.sin(this.pulse) * 1.5;
+        // draw connections to nearby nodes
+        nodes.forEach((n) => {
+          if (n === this) return;
+          const dx = n.x - this.x, dy = n.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(n.x, n.y);
+            ctx.strokeStyle = `rgba(124,58,237,${(1 - dist / 120) * 0.07})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+        // node circle
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, pr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(124,58,237,${this.opacity})`;
+        ctx.fill();
+        // glow ring
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, pr + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(6,182,212,${this.opacity * 0.4})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+
+    // ── Fire / spark bursts ──
+    const sparks = [];
+    class Spark {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 3.5;
+        this.vy = -(Math.random() * 4 + 1.5);
+        this.life = 1;
+        this.decay = Math.random() * 0.025 + 0.012;
+        this.size = Math.random() * 2.5 + 0.8;
+        this.hot = Math.random() > 0.5;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.06; // gravity
+        this.vx *= 0.97;
+        this.life -= this.decay;
+      }
+      draw() {
+        if (this.life <= 0) return;
+        const r = this.hot ? `255,${Math.floor(100 + this.life * 100)},20` : `245,158,11`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r},${this.life * 0.85})`;
+        ctx.fill();
+      }
+    }
+
+    // ── Glitch / split lines ──
+    const glitches = [];
+    class GlitchLine {
+      constructor() { this.reset(); }
+      reset() {
+        this.y = Math.random() * height;
+        this.w = Math.random() * width * 0.4 + 60;
+        this.x = Math.random() * (width - this.w);
+        this.h = Math.random() * 2 + 0.5;
+        this.life = 1;
+        this.decay = Math.random() * 0.06 + 0.03;
+        this.color = Math.random() > 0.5 ? '6,182,212' : '245,158,11';
+        this.offset = (Math.random() - 0.5) * 18;
+      }
+      update() { this.life -= this.decay; }
+      draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = this.life * 0.35;
+        ctx.fillStyle = `rgba(${this.color},1)`;
+        ctx.fillRect(this.x + this.offset, this.y, this.w, this.h);
+        // split duplicate
+        ctx.globalAlpha = this.life * 0.15;
+        ctx.fillRect(this.x - this.offset * 0.5, this.y + 2, this.w * 0.6, this.h * 0.5);
+        ctx.restore();
+      }
+    }
+
+    // ── Populate objects ──
+    for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+    const aiSymbols = Array.from({ length: isMobile ? 12 : 24 }, () => new AiSymbol());
+    const cubes = Array.from({ length: isMobile ? 5 : 10 }, () => new GlassCube());
+    const nodes = Array.from({ length: isMobile ? 8 : 16 }, () => new NeuralNode());
+    for (let i = 0; i < 6; i++) glitches.push(new GlitchLine());
+
+    // ── Spark burst spawner ──
+    let sparkTimer = 0;
+    const spawnBurst = () => {
+      const bx = Math.random() * width;
+      const by = Math.random() * height * 0.8 + height * 0.1;
+      const count = Math.floor(Math.random() * 18 + 8);
+      for (let i = 0; i < count; i++) sparks.push(new Spark(bx, by));
+    };
 
     const resizeCanvas = () => {
       width = window.innerWidth;
@@ -104,21 +321,45 @@ if (canvas) {
 
     resizeCanvas();
 
-    for (let i = 0; i < particleCount; i += 1) {
-      particles.push(new Particle());
-    }
-
     const animate = () => {
-      if (!isPageVisible) {
-        animationFrameId = 0;
-        return;
-      }
+      if (!isPageVisible) { animationFrameId = 0; return; }
 
       ctx.clearRect(0, 0, width, height);
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
+      time++;
+
+      // particles
+      particles.forEach((p) => { p.update(); p.draw(); });
+
+      // ai symbols
+      aiSymbols.forEach((s) => { s.update(); s.draw(); });
+
+      // cubes
+      cubes.forEach((c) => { c.update(); c.draw(); });
+
+      // neural nodes
+      nodes.forEach((n) => { n.update(); n.draw(nodes); });
+
+      // glitch lines — randomly reset dead ones
+      glitches.forEach((g) => {
+        g.update();
+        g.draw();
+        if (g.life <= 0 && Math.random() < 0.004) g.reset();
       });
+
+      // sparks
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        sparks[i].update();
+        sparks[i].draw();
+        if (sparks[i].life <= 0) sparks.splice(i, 1);
+      }
+
+      // spawn burst every ~4-8 seconds randomly
+      sparkTimer++;
+      if (sparkTimer > 240 && Math.random() < 0.008) {
+        spawnBurst();
+        sparkTimer = 0;
+      }
+
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -127,12 +368,10 @@ if (canvas) {
     window.addEventListener('resize', resizeCanvas, { passive: true });
     document.addEventListener('visibilitychange', () => {
       isPageVisible = !document.hidden;
-
       if (!isPageVisible && animationFrameId) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = 0;
       }
-
       if (isPageVisible && !animationFrameId) {
         animationFrameId = requestAnimationFrame(animate);
       }
