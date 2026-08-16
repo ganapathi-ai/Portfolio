@@ -66,16 +66,6 @@ export const RESUME = {
       desc: "Building end-to-end data science projects spanning healthcare analytics, forecasting, and ML model deployment.",
     },
     {
-      role: "AI Intern",
-      company: "Clinchbridge",
-      location: "Remote",
-      period: "Jan 2026 – Feb 2026",
-      duration: "2 months",
-      active: false,
-      tags: ["AI", "Deep Learning"],
-      desc: "Contributed to AI research and development projects in a fast-paced startup environment.",
-    },
-    {
       role: "Cardiovascular Technical Intern",
       company: "KIMS Hospitals",
       location: "Srikakulam, Andhra Pradesh",

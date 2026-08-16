@@ -81,7 +81,7 @@ export default function Experience() {
             <div>
               <h3 className="font-bold text-base mb-2">Unique Dual-Domain Background</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Over <span className="text-violet-400 font-semibold">3+ years of hands-on clinical cardiovascular experience</span> across KIMS Hospitals, KIMS-Sunshine, and Great Eastern Medical School — combined with <span className="text-cyan-400 font-semibold">cutting-edge AI/ML internships</span> at Ethara AI, Unified Mentor, and Clinchbridge. This rare intersection enables domain-aware healthcare AI solutions that bridge the clinical-technical gap.
+                Over <span className="text-violet-400 font-semibold">3+ years of hands-on clinical cardiovascular experience</span> across KIMS Hospitals, KIMS-Sunshine, and Great Eastern Medical School — combined with <span className="text-cyan-400 font-semibold">cutting-edge AI/ML internships</span> at Ethara AI and Unified Mentor. This rare intersection enables domain-aware healthcare AI solutions that bridge the clinical-technical gap.
               </p>
             </div>
           </div>
